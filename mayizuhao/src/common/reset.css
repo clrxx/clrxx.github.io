@@ -1,0 +1,143 @@
+@charset "utf-8";
+/* CSS Document */
+/*
+KISSY CSS Reset
+理念：清除和重置是紧密不可分的
+特色：1.适应中文 2.基于最新主流浏览器
+*/
+
+/* 清除内外边距 */
+html, body, h1, h2, h3, h4, h5, h6, hr, p, blockquote, /* 结构元素 */
+dl, dt, dd, ul, ol, li, /* 列表元素 */
+pre, /* 文本格式元素 */
+fieldset, lengend, button, input, textarea, form, /* 表单元素 */
+th, td, /* 表格元素 */
+figure {
+    margin: 0;
+    padding: 0;
+}
+
+/* 设置默认字体样式 */
+html, body, a, button, input, select, textarea {
+    color: #515a6e;
+    line-height: 1;
+    font-size: 14px;
+    font-family: "微软雅黑", "Microsoft YaHei", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 清除部分端默认样式 */
+button, input, select, textarea {
+    outline: none;
+	vertical-align: middle;
+	-ms-appearance: none;
+	-moz-appearance: none;
+    -webkit-appearance: none;
+}
+
+/* 修改placeholder的颜色 */
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder{
+    color: #c0c4cc;
+}
+input::-moz-placeholder,
+textarea::-moz-placeholder{
+    color: #c0c4cc;
+}
+input:-moz-placeholder,
+textarea:-moz-placeholder{
+    color: #c0c4cc;
+}
+input:-ms-input-placeholder,
+textarea:-ms-input-placeholder{
+    color: #c0c4cc;
+}
+
+/* 修改disabled的默认样式 */
+input[disabled],
+input:disabled,
+input.disabled,
+textarea[disabled],
+textarea:disabled,
+textarea.disabled,
+select[disabled],
+select:disabled,
+select.disabled {
+    background: transparent;
+    -webkit-text-fill-color: #c0c4cc;
+    color: #c0c4cc;
+	-webkit-opacity: 1;
+    opacity: 1;
+}
+
+/* 重置a标签文本格式 */
+a {
+    display: inline-block;
+    text-decoration: none;
+}
+span, em{
+    display: inline-block;
+}
+
+/* 重置h标签 */
+h1, h2, h3, h4, h5, h6 {
+    font-size: 100%;
+    font-weight: normal;
+}
+
+address, cite, dfn, em, var { font-style: normal; } /* 将斜体扶正 */
+code, kbd, pre, samp, tt { font-family: "微软雅黑", Courier, monospace; } /* 统一等宽字体 */
+small { font-size: 12px; } /* 小于 12px 的中文很难阅读，让 small 正常化 */
+
+/* 注：1.ie6 不支持 abbr; 2.这里用了属性选择符，ie6 下无效果 */
+abbr[title], acronym[title], dfn[title] {
+    border-bottom: 1px dotted #515a6e;
+    cursor: help;
+}
+
+/* 重置列表元素 */
+ul, ol { list-style: none; }
+
+/* 重置表单元素 */
+legend { color: #515a6e; } /* for ie6 */
+fieldset, img { border: none; } /* img 搭车：让链接里的 img 无边框 */
+
+/* 重置表格元素 */
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/* 清除浮动 */
+.clearfix:after {
+	clear: both;
+	display: block;
+	height: 0;
+	content: ".";
+	visibility: hidden;
+}
+.clearfix { *zoom: 1; }
+
+/* 重置 hr */
+hr {
+	display: block;
+    border: none;
+    height: 1px;
+}
+
+/* 重置 pre */
+pre {
+    white-space: pre; /* CSS2 */
+    white-space: pre-wrap; /* CSS 2.1 */
+    white-space: pre-line; /* CSS 3 (and 2.1 as well, actually) */
+    word-wrap: break-word; /* IE */
+}
+
+/* 重置 blockquote, q 标签*/
+blockquote, q { quotes: none; }
+blockquote:before, blockquote:after, q:before, q:after { content: ''; }
+
+/* Vue未编译处理 */
+[v-cloak] {
+    display: none;
+}
