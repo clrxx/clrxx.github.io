@@ -8,7 +8,7 @@
 			</div>
 			<div class="header-navs">
 				<div class="login">
-					<a>你好，请</a><a class="r" @click="toAuth">登录</a><em>/</em><a @click="toAuth(1)">注册</a>
+					<span>你好，请</span><a class="r" @click="toAuth">登录</a>/<a @click="toAuth(1)">注册</a>
 				</div>
 				<div class="user-info">
 					<h3>你好，昵称</h3>
@@ -96,17 +96,15 @@ export default {
 	.header-navs {
 		display: flex;
 		align-items: center;
-		cursor: pointer;
 		.login {
+			color: #ccc;
 			a {
 				color: #ccc;
+				cursor: pointer;
 			}
 			.r {
-				margin-left: 10px;
+				margin-left: 5px;
 				color: red;
-			}
-			em {
-				color: #ccc;
 			}
 		}
 		.user-info {
@@ -118,6 +116,7 @@ export default {
 			}
 			.el-dropdown {
 				color: #ccc;
+				cursor: pointer;
 			}
 			.el-icon--right {
 				margin-left: 0;

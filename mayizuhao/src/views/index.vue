@@ -447,7 +447,8 @@ export default {
 			padding: 0 10px;
 			li {
 				overflow: hidden;
-				width: 370px;
+				width: 380px;
+				height: 139px;
 				box-sizing: border-box;
 				cursor: pointer;
 				img {
