@@ -111,8 +111,8 @@ export default new Router({
 					component: () => import('./components/announcement/notice'),
 				},
 				{
-					path: '/announcement/activity',
-					name: 'announcement/activity',
+					path: '/activity',
+					name: 'activity',
 					meta: {
 						isShowLogo: 1,
 						isShowFooter: 1
@@ -122,6 +122,24 @@ export default new Router({
 				{
 					path: '/announcement/detail',
 					name: 'announcement/detail',
+					meta: {
+						isShowLogo: 1,
+						isShowFooter: 1
+					},
+					component: () => import('./components/announcement/detail'),
+				},
+				{
+					path: '/activity/detail',
+					name: 'activity/detail',
+					meta: {
+						isShowLogo: 1,
+						isShowFooter: 1
+					},
+					component: () => import('./components/announcement/detail'),
+				},
+				{
+					path: '/FAQ/detail',
+					name: 'FAQ/detail',
 					meta: {
 						isShowLogo: 1,
 						isShowFooter: 1

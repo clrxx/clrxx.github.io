@@ -47,7 +47,7 @@
 			</div>
 		</div>
 		<transition name="el-fade-in">
-			<div v-show="isShowMask" class="zone-mask">
+			<div v-if="isShowMask" class="zone-mask">
 				<div class="zone-mask-main">
 					<img class="pic1" src="@/assets/dada1.jpg">
 					<img class="pic2" src="@/assets/dada2.png">
@@ -123,12 +123,12 @@ export default {
 			} else {
 				this.isShowMask = false;
 				document.documentElement.style.overflow = 'auto';
+				let zoneTm = new Date().getTime() + (24*60*60*1000);
+				localStorage.setItem('zoneTm', zoneTm);
 				this.toPaymentDetail();
 			}
 		},
 		toPaymentDetail () {
-			let zoneTm = new Date().getTime() + (24*60*60*1000);
-			localStorage.setItem('zoneTm', zoneTm);
 			this.$router.push({path: '/payment-detail', query: { id: 1 }});
 		}
 	}

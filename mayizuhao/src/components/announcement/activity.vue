@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="activity">
 		<activity-list :neid="2"></activity-list>
 	</div>
 </template>

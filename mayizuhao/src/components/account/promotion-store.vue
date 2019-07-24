@@ -55,7 +55,7 @@ export default {
 			}
 		};
 		return {
-			userRoles: [],
+			userRoles: ['专区'],
 			tableData: [],
 			showOpts: false,
 
@@ -82,7 +82,6 @@ export default {
 		}
 	},
 	created () {
-		this.userRoles = JSON.parse(localStorage.getItem('userRoles'));
 		for (let i = 0; i < this.userRoles.length; i++) {
 			if (this.userRoles[i] == '专区') {
 				this.showOpts = true;

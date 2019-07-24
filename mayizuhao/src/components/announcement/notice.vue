@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="notice">
 		<notice-list :neid="1"></notice-list>
 	</div>
 </template>

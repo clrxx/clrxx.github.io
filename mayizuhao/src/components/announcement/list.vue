@@ -5,7 +5,7 @@
 			<h3 v-if="neid == 2" class="ac">活动中心<span>Activity</span></h3>
 		</div>
 		<ul class="notice-list">
-			<li v-for="i in 10" :key="i" @click="toAnnouncementDetail(0)">
+			<li v-for="i in 10" :key="i" @click="toAnnouncementDetail(i)">
 				<h3>2019春节假期提现调整公告{{ neid }}</h3>
 				<p>2019-02-02 02:02:02</p>
 			</li>
@@ -29,7 +29,11 @@ export default {
 	},
 	methods: {
 		toAnnouncementDetail (id) {
-			this.$router.push({path: '/announcement/detail', query: { id }});
+			if (this.neid == 1) {
+				this.$router.push({path: '/announcement/detail', query: { sort: 1, id }});
+			} else if (this.neid == 2) {
+				this.$router.push({path: '/activity/detail', query: { sort: 1, id }});
+			}
 		},
 		pageChange (e) {
 			console.log(e)

@@ -15,6 +15,27 @@
 	</div>
 </template>
 
+<script>
+export default {
+	data () {
+		return {
+			query: {}
+		}
+	},
+	created () {
+		console.log(this.$route.query);
+		this.query = this.$route.query;
+	},
+	watch: {
+		$route () {
+			console.log(this.$route.query);
+			this.query = this.$route.query;
+		}
+	}
+}
+</script>
+
+
 <style lang="scss" scoped>
 	.detail {
 		padding: 0 15px;

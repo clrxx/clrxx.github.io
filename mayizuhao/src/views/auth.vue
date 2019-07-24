@@ -96,8 +96,6 @@ export default {
 			this.showModeNum = 1;
 			this.bounceDirection = 'bounceRight';
 		}
-		// 登录成功存储
-		// localStorage.setItem('userRoles', JSON.stringify(res.data.res.roles));
 	},
 	methods: {
 		switchMode (i) {

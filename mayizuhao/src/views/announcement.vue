@@ -12,11 +12,11 @@
 							<span>常见问题</span>
 						</template>
 						<el-menu-item-group>
-							<el-menu-item v-for="(i, index) in FAQ" :index="'FAQ'+ index" :key="index">常见问题1</el-menu-item>
+							<el-menu-item v-for="item in FAQ" :index="'/FAQ'+ item" :key="item">常见问题{{ item }}</el-menu-item>
 						</el-menu-item-group>
 					</el-submenu>
 					<el-menu-item index="/announcement"><img src="@/assets/notice_news.png" alt="icon">最新公告</el-menu-item>
-					<el-menu-item index="/announcement/activity"><img src="@/assets/activity_news.png" alt="icon">活动中心</el-menu-item>
+					<el-menu-item index="/activity"><img src="@/assets/activity_news.png" alt="icon">活动中心</el-menu-item>
 				</el-menu>
 			</div>
 			<div class="announcement-cont">
@@ -36,7 +36,7 @@ export default {
 	data () {
 		return {
 			announcementPath: '',
-			FAQ: ['1', '2']
+			FAQ: [1, 2]
 		}
 	},
 	created () {
@@ -45,12 +45,12 @@ export default {
 	methods: {
 		menuChange (index) {
 			this.announcementPath = index;
-			if (index.indexOf('FAQ') == 0) {
-				let id = index.slice(index.indexOf('FAQ')+3);
-				this.$router.push({path: '/announcement/detail', query: { id }});
-			} else {
+			if (index.indexOf('FAQ') == -1) {
 				this.$router.push(index);
 				this.$refs.closeFAQ.close('FAQ');
+			} else {
+				let id = parseInt(index.slice(index.indexOf('FAQ')+3));
+				this.$router.push({path: '/FAQ/detail', query: { sort: 0, id }});
 			}
 			sessionStorage.setItem('announcement-path', index);
 		}
@@ -79,9 +79,13 @@ export default {
 				margin-right: 10px;
 			}
 		}
-		.el-menu-item {
-			display: flex;
-			align-items: center;
+		.el-menu-item-group{
+			.el-menu-item {
+				height: auto;
+				padding: 15px 20px 15px 40px;
+				white-space: initial;
+				line-height: 1.5;
+			}
 		}
 		.el-menu-item.is-active {
 			background: #ecf5ff;

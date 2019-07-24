@@ -41,13 +41,12 @@ export default {
 	data () {
 		return {
 			accountPath: '',
-			userRoles: [],
+			userRoles: ['专区', '管理员'],
 			showPromotionStore: false
 		}
 	},
 	created () {
 		this.accountPath = sessionStorage.getItem('account-path');
-		this.userRoles = JSON.parse(localStorage.getItem('userRoles'));
 		for (let i = 0; i < this.userRoles.length; i++) {
 			if (this.userRoles[i] == '专区' || this.userRoles[i] == '管理员') {
 				this.showPromotionStore = true;
@@ -147,7 +146,6 @@ export default {
 			}
 		}
 	}
-
 	
 	.lease-order-thead {
 		display: flex;

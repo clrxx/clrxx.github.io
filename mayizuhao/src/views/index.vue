@@ -52,16 +52,25 @@
 					</div>
 				</div>
 				<div class="index-carousel">
-					<div class="carousel">
+					<div v-if="!isShowZone" class="carousel">
 						<el-carousel trigger="click" height="320px" :interval="5000">
-							<el-carousel-item v-for="item in 4" :key="item">
-								<img @click="toZone" src="https://img.myzuhao.top/5cdbab19b8bed69358.png" alt="pic">
+							<el-carousel-item>
+								<img src="https://img.myzuhao.top/%E8%8B%B1%E9%9B%84%E8%81%94%E7%9B%9F%E8%BD%AE%E6%92%AD%E5%9B%BE.jpeg" alt="pic">
+							</el-carousel-item>
+							<el-carousel-item>
+								<img src="https://img.myzuhao.top/%E7%A9%BF%E8%B6%8A%E7%81%AB%E7%BA%BF%E8%BD%AE%E6%92%AD%E5%9B%BE.jpeg" alt="pic">
+							</el-carousel-item>
+							<el-carousel-item>
+								<img src="https://img.myzuhao.top/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80%E8%BD%AE%E6%92%AD%E5%9B%BE.jpg" alt="pic">
 							</el-carousel-item>
 						</el-carousel>
 					</div>
+					<div v-if="isShowZone" class="ze">
+						<img @click="toZone" src="https://img.myzuhao.top/5cdbab19b8bed69358.png" alt="pic">
+					</div>
 					<ul class="help">
 						<li>
-							<img src="@/assets/yd.jpg" alt="pic">
+							<img @click="toAnnouncement(0, 1)" src="@/assets/yd.jpg" alt="pic">
 						</li>
 						<li>
 							<img src="@/assets/gzh.jpg" alt="pic">
@@ -268,7 +277,7 @@ export default {
 			isShowHotGame: false,
 			isShowClsGame: false,
 			tabsActive: 'one',
-			isShowZone: true,
+			isShowZone: false,
 			isShoContact: true
 		}
 	},
@@ -292,12 +301,16 @@ export default {
 			this.$router.push({path: '/filtering', query: { id }});
 		},
 		toAnnouncement (index, id) {
-			if (index == 1) {
+			if (index == 0) {
+				sessionStorage.setItem('announcement-path', '/FAQ1');
+				this.$router.push({path: '/FAQ/detail', query: { sort: 0, id }});
+			} else if (index == 1) {
 				sessionStorage.setItem('announcement-path', '/announcement');
+				this.$router.push({path: '/announcement/detail', query: {  sort: 1, id }});
 			} else if (index == 2) {
-				sessionStorage.setItem('announcement-path', '/announcement/activity');
+				sessionStorage.setItem('announcement-path', '/activity');
+				this.$router.push({path: '/activity/detail', query: {  sort: 1, id }});
 			}
-			this.$router.push({path: '/announcement/detail', query: { id }});
 		},
 		isZone () {
 			this.isShowZone = false;
@@ -439,6 +452,15 @@ export default {
 					width: 100%;
 					height: 100%;
 				}
+			}
+		}
+		.ze {
+			overflow: hidden;
+			height: 320px;
+			padding: 10px;
+			img {
+				width: 100%;
+				height: 100%;
 			}
 		}
 		.help {
