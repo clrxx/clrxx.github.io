@@ -1,23 +1,16 @@
 <template>
 	<div id="app">
-		<header-main />
-			<div class="content-main">
-				<logo-main v-if="this.$route.meta.isShowLogo == 1" />
-				<router-view />
-			</div>
-		<footer-main v-if="this.$route.meta.isShowFooter == 1" />
+		<router-view />
 	</div>
 </template>
 
 <script>
-import HeaderMain from '@/components/layout/header-main'
-import LogoMain from '@/components/layout/logo-main'
-import FooterMain from '@/components/layout/footer-main'
 export default {
-	components: {
-		HeaderMain,
-		LogoMain,
-		FooterMain
+	created () {
+		let _old = parseInt(localStorage.getItem('MYloginTimestamp'));
+		let _now = new Date().getTime();
+		let _old30 = _old + 60 * 60 * 1000;
+		if ( _old30 < _now ) localStorage.clear();
 	}
 }
 </script>
@@ -39,10 +32,6 @@ export default {
 	.white-radius {
 		background: #fff;
 		border-radius: 5px;
-	}
-	.null-data {
-		padding: 30px 0;
-		text-align: center;
 	}
 	::-webkit-scrollbar {
 		width: 10px;
@@ -83,18 +72,20 @@ export default {
 	}
 	.index-carousel {
 		.el-carousel__arrow {
-			background: rgba(31, 45, 61, .3);
+			background: rgba(31, 45, 61, .5);
 		}
 		.el-carousel__arrow:hover {
-			background: rgba(31, 45, 61, .5);
+			background: rgba(31, 45, 61, .7);
 		}
 		.el-carousel__button {
 			width: 15px;
-			height: 15px;
 			border-radius: 15px;
 		}
 		.el-carousel__indicator.is-active button {
 			width: 25px;
+		}
+		.carousel:hover .el-carousel__button{
+			height: 15px;
 		}
 	}
 	.index-info-data {
@@ -129,6 +120,9 @@ export default {
 		}
 	}
 	.lease-carousel {
+		.el-carousel__container {
+			height: 100%;
+		}
 		.el-carousel__arrow {
 			background: rgba(255, 95, 95, .7);
 		}
@@ -205,6 +199,11 @@ export default {
 		}
 		.el-step__description.is-success {
 			color: #409EFF;
+		}
+	}
+	.gallery-box {
+		._magnifier img {
+			object-fit: contain;
 		}
 	}
 </style>

@@ -3,14 +3,14 @@
 		<div class="zone-main wh-1300">
 			<div class="zone-bar">
 				<h3>网吧游戏特权免费玩</h3>
-				<h4>Steam特权、Origin、橘子特权平台、Uplay特权、暴雪特权 .....游戏免费畅玩！！！</h4>
+				<h4>Steam特权、Origin、橘子特权平台、Uplay特权、暴雪特权..... 游戏免费畅玩！！！</h4>
 			</div>
 			<div class="zone-games">
 				<ul class="zone-games-list">
-					<li v-for="i in 10" :key="i">
-						<router-link :to="{path: '/zone-detail', query: {id: 1}}">
-							<img src="@/assets/hotgame3.jpg" alt="pic">
-							<span>英雄联盟<em></em></span>
+					<li v-for="item in zoneInfo" :key="item.id">
+						<router-link :to="{path: '/zone-detail', query: {zoneId: item.id}}">
+							<img :src="item.imageUrl" :alt="item.name">
+							<span>{{ item.name }}<em></em></span>
 						</router-link>
 					</li>
 				</ul>
@@ -20,39 +20,41 @@
 					<h3>我要反馈</h3>
 				</div>
 				<div class="cont clearfix">
-					<h3>没有想要的游戏？在这里告诉我们</h3>
-					<textarea placeholder="请输入你想玩的游戏..."></textarea>
-					<button>发送</button>
+					<h3>没有想要的游戏？在这里告诉我们。</h3>
+					<textarea v-model="msgCont" placeholder="请输入你想玩的游戏..."></textarea>
+					<button @click="sendMsg">发送</button>
 				</div>
 			</div>
 			<div class="zone-comment">
 				<div class="comment-title">
 					<h3>最有价值的评论</h3>
 				</div>
+				<null-data v-if="comment.length == 0" />
 				<ul class="comment-list">
-					<li v-for="i in 10" :key="i">
+					<li v-for="item in comment" :key="item.id">
 						<div class="info">
-							<img src="https://i.loli.net/2018/12/31/5c2a12b316137.png" alt="pic">
-							<span>181****7075</span>
+							<img :src="item.userImg" alt="pic">
+							<span>{{ item.userName }}</span>
 						</div>
 						<div class="cont">
-							<h3>发布于：2019-05-16 01:59:04</h3>
-							<p>建议上鬼泣，希望蚂蚁专区越来越棒！！！</p>
+							<h3>发布于：{{ item.createTimeStr }}</h3>
+							<p>{{ item.content }}</p>
 							<div class="cmit">
 								<div class="or">
 									<h4>这篇评论您赞同么？</h4>
-									<span><i class="el-icon-thumb" />是</span>
-									<span class="active"><i class="el-icon-thumb d" />否</span>
+									<span @click="upComment(item.id, item.upFlag, item.downFlag)" :class="{ active: item.upFlag }"><i class="el-icon-thumb" />是</span>
+									<span @click="downComment(item.id, item.upFlag, item.downFlag)" :class="{ active: item.downFlag }"><i class="el-icon-thumb d" />否</span>
 								</div>
-								<div class="num">6人赞同</div>
+								<div class="num">{{ item.upCount }}人赞同</div>
 							</div>
 						</div>
 					</li>
 				</ul>
-				<el-pagination :total="20" :page-size="10" :current-page="1" @current-change="pageChange" background layout="prev, pager, next" />
+				<div v-if="comment.length > 0" class="pagination">
+					<el-pagination :total="pageTotal" :page-size="pageSize" :current-page="pageCurrent" @current-change="pageChange" background layout="prev, pager, next" />
+				</div>
 			</div>
 		</div>
-		<el-backtop></el-backtop>
 	</div>
 </template>
 
@@ -60,14 +62,111 @@
 export default {
 	data () {
 		return {
-			pageTotal: 20,
+			zoneInfo: [],
+			msgCont: '',
+			comment: [],
+
+			pageTotal: 10,
 			pageSize: 10,
 			pageCurrent: 1
 		}
 	},
+	created () {
+		this.$api.post('GoodPlatformPage', {
+			itemCount: 50,
+			pageIndex: 0
+		}).then(res => {
+			this.zoneInfo = res.obj.obj;
+		})
+		this.mAjax();
+	},
 	methods: {
+		mAjax () {
+			this.$api.post('CommentPage', {
+				itemCount: this.pageSize,
+				pageIndex: (this.pageCurrent - 1)
+			}).then(res => {
+				this.comment = res.obj.obj;
+				this.pageTotal = res.obj.allItemCount;
+			})
+		},
+		sendMsg () {
+			if (!this.msgCont) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请输入你想玩的游戏'
+				});
+			} else if (this.msgCont.length < 10 || this.msgCont.length > 200) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请控制字数在10~200之间'
+				});
+			} else {
+				this.$api.post('AddComment', JSON.stringify(this.msgCont))
+					.then(res => {
+						this.$notify({
+							title: '温馨提示',
+							message: '评论成功'
+						});
+						this.msgCont = '';
+					})
+			}
+		},
+		upComment (id, up, down) {
+			if (!up && !down) {
+				this.$api.post('UpComment', id)
+					.then(res => {
+						this.$notify({
+							title: '温馨提示',
+							message: '已赞同'
+						});
+						this.mAjax();
+					})
+			} else if (up && !down) {
+				this.$api.post('CancelUpComment', id)
+					.then(res => {
+						this.$notify({
+							title: '温馨提示',
+							message: '已取消赞同'
+						});
+						this.mAjax();
+					})
+			} else if (!up && down) {
+				this.$notify({
+					title: '温馨提示',
+					message: '你已否定过这条评论'
+				});
+			}
+		},
+		downComment (id, up, down) {
+			if (!up && !down) {
+				this.$api.post('DownComment', id)
+					.then(res => {
+						this.$notify({
+							title: '温馨提示',
+							message: '已否定'
+						});
+						this.mAjax();
+					})
+			} else if (!up && down) {
+				this.$api.post('CancelDownComment', id)
+					.then(res => {
+						this.$notify({
+							title: '温馨提示',
+							message: '已取消否定'
+						});
+						this.mAjax();
+					})
+			} else if (up && !down) {
+				this.$notify({
+					title: '温馨提示',
+					message: '你已赞同过这条评论'
+				});
+			}
+		},
 		pageChange (e) {
-			console.log(e)
+			this.pageCurrent = e;
+			this.mAjax();
 		}
 	}
 }
@@ -126,12 +225,12 @@ export default {
 				color: #fff;
 				line-height: 22px;
 				font-size: 12px;
-				border-bottom-left-radius: 3px; 
+				border-bottom-left-radius: 5px; 
 			}
 			em {
 				position: absolute;
 				top: 0;
-				left: -20px;
+				left: -19px;
 				width: 0;
 				height: 0;
 				border-top: 20px solid #5abaf7;
@@ -208,6 +307,7 @@ export default {
 				img {
 					width: 64px;
 					height: 64px;
+					border-radius: 3px;
 					object-fit: cover;
 				}
 				span {
@@ -230,7 +330,7 @@ export default {
 					line-height: 1.5;
 				}
 				p {
-					margin: 40px 0 20px;
+					margin: 30px 0 20px;
 					color: #fff;
 					font-size: 17px;
 					line-height: 1.3;
@@ -255,7 +355,7 @@ export default {
 						padding: 3px 5px;
 						margin: 0 10px;
 						background: #474954;
-						color: #1ca2e9;
+						color: #fff;
 						font-size: 14px;
 						cursor: pointer;
 						i {
@@ -265,7 +365,7 @@ export default {
 							transform: rotateZ(180deg);
 						}
 						&.active {
-							color: #fff;
+							color: #1ca2e9;
 						}
 					}
 				}

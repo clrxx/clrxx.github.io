@@ -2,16 +2,15 @@
 	<div class="header-main">
 		<div class="header-cont">
 			<div class="header-about">
-				<img @click="toIndexPage" src="@/assets/house.png" alt="house">
-				<h2 @click="toIndexPage">您好，欢迎来到蚂蚁租号！</h2>
+				<h2 @click="toIndexPage"><img src="@/assets/house.png" alt="house">您好，欢迎来到蚂蚁租号！</h2>
 				<a href="http://wpa.qq.com/msgrd?v=3&uin=2502851992&site=qq&menu=yes" target="_blank">联系客服</a>
 			</div>
 			<div class="header-navs">
-				<div class="login">
+				<div v-if="!MYuserInfo" class="login">
 					<span>你好，请</span><a class="r" @click="toAuth">登录</a>/<a @click="toAuth(1)">注册</a>
 				</div>
-				<div class="user-info">
-					<h3>你好，昵称</h3>
+				<div v-if="MYuserInfo" class="user-info">
+					<h3>你好，{{ MYuserInfo.userName }}</h3>
 					<el-dropdown @command="commandChange">
 						<span class="el-dropdown-link">个人中心<i class="el-icon-arrow-down el-icon--right"></i>
 						</span>
@@ -19,13 +18,14 @@
 							<el-dropdown-item command="/account">首页</el-dropdown-item>
 							<el-dropdown-item command="/account/buyer-order">我的订单</el-dropdown-item>
 							<el-dropdown-item command="/account/seller-order">我出租的帐号</el-dropdown-item>
-							<el-dropdown-item  @click.native="logout" divided>退出登录</el-dropdown-item>
+							<el-dropdown-item command="logout" @click.native="logout" divided>退出登录</el-dropdown-item>
 						</el-dropdown-menu>
 					</el-dropdown>
 				</div>
 				<ul class="navs-list">
 					<li>帮助中心</li>
 					<li>关于我们</li>
+					<router-link tag="li" to="/release">发布商品</router-link>
 				</ul>
 			</div>
 		</div>
@@ -34,6 +34,14 @@
 
 <script>
 export default {
+	data () {
+		return {
+			MYuserInfo: null
+		}
+	},
+	created () {
+		this.MYuserInfo = JSON.parse(localStorage.getItem('MYuserInfo'));
+	},
 	methods: {
 		toAuth (i) {
 			if (i == 1) {
@@ -43,11 +51,20 @@ export default {
 			}
 		},
 		commandChange (command) {
-			sessionStorage.setItem('account-path', command);
-			this.$router.push(command);
+			if (command != 'logout') {
+				this.$router.push({path: command, query: {accountPath : command}});
+			}
 		},
 		logout () {
-			this.$router.push('/auth');
+			this.$api.post('LogOut')
+				.then(res => {
+					this.$notify({
+						title: '温馨提示',
+						message: '已成功退出登录'
+					});
+					localStorage.clear();
+					this.$router.push('/auth');
+				});
 		},
 		toIndexPage () {
 			this.$router.push('/');
@@ -78,19 +95,24 @@ export default {
 	.header-about {
 		display: flex;
 		align-items: center;
-		cursor: pointer;
 		h2 {
-			padding: 0 10px 0 5px;
+			display: flex;
+			align-items: center;
+			margin-right: 10px;
 			color: #ccc;
+			cursor: pointer;
+			img {
+				margin-right: 5px;
+			}
 		}
 		a {
-			display: inline-block;
 			padding: 0 12px;
 			background: #78c443;
 			color: #fff;
 			line-height: 22px;
 			text-align: center;
 			border-radius: 20px;
+			cursor: pointer;
 		}
 	}
 	.header-navs {
@@ -131,6 +153,7 @@ export default {
 				padding: 0 20px;
 				border-right: 1px solid #e4e4e4;
 				color: #ccc;
+				cursor: pointer;
 				&:last-of-type{
 					border-right: none;
 				}

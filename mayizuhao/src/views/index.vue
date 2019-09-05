@@ -4,40 +4,40 @@
 		<div class="index-main">
 			<div class="index-banner wh-1300">
 				<div class="games-class">
-					<div @mouseleave="hotGameLeave" class="hot">
-						<a v-for="i in 6" :key="i" @mouseenter="hotGameEnter" class="al">英雄联盟{{ i }}</a>
+					<div @mouseleave="isShowHotGame = false,maskRt = false" class="hot">
+						<ul class="sel-list">
+							<li v-for="(item, index) in popularGoodLen" :key="item.name" @click="toFiltering(item.path)" @mouseenter="hotGameEnter(item.path, index)">{{ item.name }}</li>
+						</ul>
 						<transition name="el-fade-in-linear">
 							<div v-show="isShowHotGame" class="index-popover-cont">
-								<div v-for="i in 10" :key="i" class="cont">
-									<h3>电信</h3>
+								<div v-for="item in popularList" :key="item.name" class="cont">
+									<h3 @click="toFiltering(item.path)">{{ item.name }}</h3>
 									<ul class="list">
-										<li v-for="is in 10" :key="is" @click="toFiltering(i)">英雄联盟 {{ i }}</li>
+										<li v-for="i in item.data" :key="i.name" @click="toFiltering(i.path)">{{ i.name }}</li>
 									</ul>
 								</div>
 							</div>
 						</transition>
+						<div v-if="maskRt" class="mask-rt"></div>
 					</div>
 					<div class="split">
 						<img src="@/assets/split_c_work.png" alt="pic">
 					</div>
 					<div class="cls">
-						<div @mouseleave="clsGameLeave">
-							<a @mouseenter="clsGameEnter" class="ls">
+						<div @mouseleave="isShowClsGame = false">
+							<a @mouseenter="clsGameEnter('游戏_端游')" class="ls">
 								<img src="@/assets/pc_game.png" alt="icon">
 								<span>端游专区</span>
 							</a>
-							<a @mouseenter="clsGameEnter" class="ls">
+							<a @mouseenter="clsGameEnter('游戏_手游')" class="ls">
 								<img src="@/assets/mobile_icon.png" alt="icon">
 								<span>手游专区</span>
 							</a>
 							<transition name="el-fade-in-linear">
 								<div v-show="isShowClsGame" class="index-popover-cont">
-									<div v-for="i in 10" :key="i" class="cont">
-										<h3>电信</h3>
-										<ul class="list">
-											<li v-for="is in 10" :key="is" @click="toFiltering(i)">英雄联盟 {{ i }}</li>
-										</ul>
-									</div>
+									<ul class="list">
+										<li v-for="item in popularList" :key="item.name" @click="toFiltering(item.path)">{{ item.name }}</li>
+									</ul>
 								</div>
 							</transition>
 						</div>
@@ -55,13 +55,13 @@
 					<div v-if="!isShowZone" class="carousel">
 						<el-carousel trigger="click" height="320px" :interval="5000">
 							<el-carousel-item>
-								<img src="https://img.myzuhao.top/%E8%8B%B1%E9%9B%84%E8%81%94%E7%9B%9F%E8%BD%AE%E6%92%AD%E5%9B%BE.jpeg" alt="pic">
+								<img @click="toFiltering('游戏_端游_英雄联盟')" src="https://img.myzuhao.top/%E8%8B%B1%E9%9B%84%E8%81%94%E7%9B%9F%E8%BD%AE%E6%92%AD%E5%9B%BE.jpeg" alt="pic">
 							</el-carousel-item>
 							<el-carousel-item>
-								<img src="https://img.myzuhao.top/%E7%A9%BF%E8%B6%8A%E7%81%AB%E7%BA%BF%E8%BD%AE%E6%92%AD%E5%9B%BE.jpeg" alt="pic">
+								<img @click="toFiltering('游戏_端游_穿越火线')" src="https://img.myzuhao.top/%E7%A9%BF%E8%B6%8A%E7%81%AB%E7%BA%BF%E8%BD%AE%E6%92%AD%E5%9B%BE.jpeg" alt="pic">
 							</el-carousel-item>
 							<el-carousel-item>
-								<img src="https://img.myzuhao.top/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80%E8%BD%AE%E6%92%AD%E5%9B%BE.jpg" alt="pic">
+								<img @click="toFiltering('游戏_手游_王者荣耀')" src="https://img.myzuhao.top/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80%E8%BD%AE%E6%92%AD%E5%9B%BE.jpg" alt="pic">
 							</el-carousel-item>
 						</el-carousel>
 					</div>
@@ -69,8 +69,8 @@
 						<img @click="toZone" src="https://img.myzuhao.top/5cdbab19b8bed69358.png" alt="pic">
 					</div>
 					<ul class="help">
-						<li>
-							<img @click="toAnnouncement(0, 1)" src="@/assets/yd.jpg" alt="pic">
+						<li v-for="item in FAQList" :key="item.id">
+							<img @click="toNotice(3, item.id)" src="@/assets/yd.jpg" alt="pic">
 						</li>
 						<li>
 							<img src="@/assets/gzh.jpg" alt="pic">
@@ -79,32 +79,27 @@
 				</div>
 				<div class="index-info-data">
 					<div class="info">
-						<img src="@/assets/default-avatar.png" alt="pic">
-						<div class="ln">
-							<button class="btn1">登录</button>
-							<button class="btn2">注册</button>
+						<div v-if="!MYuserInfo" class="ln">
+							<img src="@/assets/default-avatar.png" alt="pic">
+							<div class="btns">
+								<button @click="toAuth" class="btn1">登录</button>
+								<button @click="toAuth(1)" class="btn2">注册</button>
+							</div>
 						</div>
-						<!-- <div class="lo">
+						<div v-if="MYuserInfo" class="lo">
+							<img :src="MYuserInfo.userPic" alt="pic">
 							<h3>你好，欢迎来到蚂蚁租号</h3>
-							<h4><span>昵称</span><span>【退出】</span></h4>
-						</div> -->
+							<h4>{{ MYuserInfo.userName }}<span @click="login">【退出】</span></h4>
+						</div>
 					</div>
 					<div class="data">
 						<div class="tabs">
 							<el-tabs v-model="tabsActive">
-								<el-tab-pane label="最新公告" name="one">
-									<a @click="toAnnouncement(1, 1)">2019春节假期提现调整公告</a>
-									<a>限时推广功能上线公告</a>
-									<a>关于未成年防沉迷系统公告</a>
-									<a>《绝地求生》荣获Steam年度最佳大奖</a>
-									<a>游戏专区代理大招募，首期收益全归你</a>
+								<el-tab-pane label="最新公告" name="1">
+									<a v-for="item in noticeList" :key="item.id" @click="toNotice(1, item.id)">{{ item.title }}</a>
 								</el-tab-pane>
-								<el-tab-pane label="活动中心" name="two">
-									<a @click="toAnnouncement(2, 2)">2019春节假期提现调整公告</a>
-									<a>限时推广功能上线公告</a>
-									<a>关于未成年防沉迷系统公告</a>
-									<a>《绝地求生》荣获Steam年度最佳大奖</a>
-									<a>游戏专区代理大招募，首期收益全归你</a>
+								<el-tab-pane label="活动中心" name="2">
+									<a v-for="item in activityList" :key="item.id" @click="toNotice(2, item.id)">{{ item.title }}</a>
 								</el-tab-pane>
 							</el-tabs>
 						</div>
@@ -120,49 +115,13 @@
 						<img src="@/assets/header-new-game.png" alt="pic">
 					</div>
 					<ul class="new-games-list">
-						<li>
-							<a>
-								<img src="@/assets/newgame1.jpg" alt="pic">
+						<li v-for="item in newGoodLen" :key="item.name" @click="toFiltering(item.path)">
+							<a :title="item.name">
+								<img :src="item.imageUrl" :alt="item.name">
 								<em class="em-white-mark"></em>
 							</a>
 						</li>
-						<li>
-							<a>
-								<img src="@/assets/newgame2.jpg" alt="pic">
-								<em class="em-white-mark"></em>
-							</a>
-						</li>
-						<li>
-							<a>
-								<img src="@/assets/newgame3.jpg" alt="pic">
-								<em class="em-white-mark"></em>
-							</a>
-						</li>
-						<li>
-							<a>
-								<img src="@/assets/newgame4.jpg" alt="pic">
-								<em class="em-white-mark"></em>
-							</a>
-						</li>
-						<li>
-							<a>
-								<img src="@/assets/newgame5.jpg" alt="pic">
-								<em class="em-white-mark"></em>
-							</a>
-						</li>
-						<li>
-							<a>
-								<img src="@/assets/newgame6.jpg" alt="pic">
-								<em class="em-white-mark"></em>
-							</a>
-						</li>
-						<li>
-							<a>
-								<img src="@/assets/newgame7.jpg" alt="pic">
-								<em class="em-white-mark"></em>
-							</a>
-						</li>
-						<li>
+						<li @click="toFiltering('游戏')">
 							<a><img src="@/assets/more_games.jpg" alt="pic"></a>
 						</li>
 					</ul>
@@ -172,45 +131,9 @@
 						<img src="@/assets/header-hot-game.png" alt="pic">
 					</div>
 					<ul class="hot-games-list clearfix">
-						<li>
-							<a class="item1">
-								<img src="https://img.myzuhao.top/%E9%A6%96%E9%A1%B5%E6%96%B0%E6%B8%B8%E6%8E%A8%E8%8D%90%E7%BB%9D%E5%9C%B0%E6%B1%82%E7%94%9F.jpg" alt="pic">
-								<em class="em-white-mark"></em>
-							</a>
-						</li>
-						<li>
-							<a>
-								<img src="@/assets/hotgame2.jpg" alt="pic">
-								<em class="em-white-mark"></em>
-							</a>
-						</li>
-						<li>
-							<a>
-								<img src="@/assets/hotgame3.jpg" alt="pic">
-								<em class="em-white-mark"></em>
-							</a>
-						</li>
-						<li>
-							<a>
-								<img src="@/assets/hotgame4.jpg" alt="pic">
-								<em class="em-white-mark"></em>
-							</a>
-						</li>
-						<li>
-							<a>
-								<img src="@/assets/hotgame5.jpg" alt="pic">
-								<em class="em-white-mark"></em>
-							</a>
-						</li>
-						<li>
-							<a>
-								<img src="@/assets/hotgame6.jpg" alt="pic">
-								<em class="em-white-mark"></em>
-							</a>
-						</li>
-						<li>
-							<a>
-								<img src="@/assets/hotgame7.jpg" alt="pic">
+						<li v-for="(item, index) in hotGoodLen" :key="item.name" @click="toFiltering(item.path)">
+							<a :class="{'item1': index == 0}" :title="item.name">
+								<img :src="item.imageUrl" :alt="item.name">
 								<em class="em-white-mark"></em>
 							</a>
 						</li>
@@ -250,7 +173,7 @@
 			</div>
 		</div>
 		<div v-show="isShowZone" class="zone">
-			<img src="@/assets/li_af_adv.png" alt="pic">
+			<img @click="toZone" src="@/assets/li_af_adv.png" alt="pic">
 			<i @click="isZone" class="el-icon-close"></i>
 		</div>
 		<div v-show="isShoContact" class="contact">
@@ -274,42 +197,142 @@ export default {
 	},
 	data () {
 		return {
+			MYuserInfo: null,
+			popularGood: [],
+			hotGood: [],
+			popularList: [],
+			newGood: [],
+			noticeList: [],
+			activityList: [],
+			FAQList: [],
+
 			isShowHotGame: false,
+			maskRt: false,
 			isShowClsGame: false,
-			tabsActive: 'one',
+			tabsActive: '1',
 			isShowZone: false,
 			isShoContact: true
 		}
 	},
+	created () {
+		let _href = location.href;
+		if (_href.indexOf('ICode') > -1) {
+			sessionStorage.setItem('ICode', _href.slice(_href.indexOf('ICode')+6));
+		} else {
+			sessionStorage.removeItem('ICode');
+		}
+		this.MYuserInfo = JSON.parse(localStorage.getItem('MYuserInfo'));
+		this.$api.post('GetPopularGoodType')
+			.then(res => {
+				this.popularGood = res.obj;
+				this.hotGood = res.obj;
+			})
+		this.$api.post('GetNewGoodType')
+			.then(res => {
+				this.newGood = res.obj;
+			})
+		this.$api.post('GetInfoPage', {
+			infoArea: 1,
+			itemCount: 5,
+			pageIndex: 0
+		}).then(res => {
+			this.noticeList = res.obj.obj;
+		});
+		this.$api.post('GetInfoPage', {
+			infoArea: 2,
+			itemCount: 5,
+			pageIndex: 0
+		}).then(res => {
+			this.activityList = res.obj.obj;
+		});
+		
+		this.$api.post('GetInfoPage', {
+			infoArea: 3,
+			itemCount: 1,
+			pageIndex: 0
+		}).then(res => {
+			this.FAQList = res.obj.obj;
+		});
+	},
+	computed: {
+		popularGoodLen () {
+			return this.popularGood.slice(0, 6);
+		},
+		hotGoodLen () {
+			return this.hotGood.slice(0, 8);
+		},
+		newGoodLen () {
+			return this.newGood.slice(0, 7);
+		}
+	},
 	methods: {
-		hotGameEnter () {
+		toAuth (i) {
+			if (i == 1) {
+				this.$router.push({path: '/auth', query: {sign: 1}});
+			} else {
+				this.$router.push('/auth');
+			}
+		},
+		login () {
+			this.$api.post('LogOut')
+				.then(res => {
+					this.$notify({
+						title: '温馨提示',
+						message: '已成功退出登录'
+					});
+					localStorage.clear();
+					this.$router.push('/auth');
+				});
+		},
+		hotGameEnter (path, index) {
+			if (index % 2 == 0) this.maskRt = true;
+			let dataList = [];
+			this.$api.post('GetChildrenType', JSON.stringify(path))
+				.then(res => {
+					let _list = res.obj;
+					let _listLen = _list.length;
+					for (let i=0; i<_listLen; i++) {
+						if (JSON.stringify(_list[i].path).indexOf('峡谷之巅') != -1) {
+							dataList[i] = {
+								name: _list[i].name,
+								path: _list[i].path,
+							};
+							continue;
+						}
+						dataList[i] = {
+							name: _list[i].name,
+							path: _list[i].path,
+							data: []
+						};
+						this.$api.post('GetChildrenType', JSON.stringify(_list[i].path))
+							.then(res => {
+								dataList[i].data = res.obj;
+							})
+					}
+					this.popularList = dataList;
+				})
 			this.isShowHotGame = true;
 		},
-		hotGameLeave () {
-			this.isShowHotGame = false;
-		},
-		clsGameEnter () {
+		clsGameEnter (path) {
+			this.$api.post('GetChildrenType', JSON.stringify(path))
+				.then(res => {
+					this.popularList = res.obj;
+				})
 			this.isShowClsGame = true;
-		},
-		clsGameLeave () {
-			this.isShowClsGame = false;
 		},
 		toZone () {
 			this.$router.push('/zone');
 		},
 		toFiltering (id) {
-			this.$router.push({path: '/filtering', query: { id }});
+			this.$router.push({path: '/filtering', query: {goodsId: id}});
 		},
-		toAnnouncement (index, id) {
-			if (index == 0) {
-				sessionStorage.setItem('announcement-path', '/FAQ1');
-				this.$router.push({path: '/FAQ/detail', query: { sort: 0, id }});
-			} else if (index == 1) {
-				sessionStorage.setItem('announcement-path', '/announcement');
-				this.$router.push({path: '/announcement/detail', query: {  sort: 1, id }});
+		toNotice (index, id) {
+			if (index == 1) {
+				this.$router.push({path: '/notice/detail', query: {noticePath: '/notice', nId: id}});
 			} else if (index == 2) {
-				sessionStorage.setItem('announcement-path', '/activity');
-				this.$router.push({path: '/activity/detail', query: {  sort: 1, id }});
+				this.$router.push({path: '/activity/detail', query: {noticePath: '/activity', nId: id}});
+			} else if (index == 3) {
+				this.$router.push({path: '/FAQ/detail', query: {noticePath: `/FAQ${id}`, nId: id}});
 			}
 		},
 		isZone () {
@@ -336,24 +359,38 @@ export default {
 		background: #312b30;
 		box-sizing: border-box;
 		.hot {
-			display: flex;
-			flex-wrap: wrap;
-			justify-content: space-between;
+			position: relative;
 			padding: 0 25px;
-			.al {
-				display: inline-block;
-				width: 80px;
-				margin: 12px 0;
-				border: 1px solid rgba(204, 204, 204, 0.2);
-				color: #fff;
-				text-align: center;
-				line-height: 30px;
-				border-radius: 30px;
-				cursor: pointer;
-				&:hover {
-					border-color: #f60;
-					color: #f60;
+			.sel-list {
+				display: flex;
+				justify-content: space-between;
+				flex-wrap: wrap;
+				li {
+					width: 80px;
+					margin: 12px 0;
+					border: 1px solid rgba(204, 204, 204, 0.2);
+					color: #fff;
+					text-align: center;
+					line-height: 30px;
+					border-radius: 30px;
+					cursor: pointer;
+					&:hover {
+						border-color: #f60;
+						color: #f60;
+					}
 				}
+			}
+			.mask-rt {
+				position: absolute;
+				top: 0;
+				right: 0;
+				z-index: 3;
+				width: 120px;
+				height: 100%;
+				background: transparent;
+			}
+			.index-popover-cont {
+				top: -30px;
 			}
 		}
 		.split {
@@ -422,7 +459,7 @@ export default {
 				color: #666;
 				border: 1px solid #666;
 				border-radius: 3px;
-				cursor: default;
+				cursor: pointer;
 			}
 		}
 		.list {
@@ -466,7 +503,7 @@ export default {
 		.help {
 			display: flex;
 			justify-content: space-between;
-			padding: 0 10px;
+			padding: 0 13px;
 			li {
 				overflow: hidden;
 				width: 380px;
@@ -490,15 +527,17 @@ export default {
 		background: #fff;
 		box-sizing: border-box;
 		.info {
+			margin-bottom: 50px;
 			text-align: center;
 			img {
 				width: 60px;
 				height: 60px;
+				margin-bottom: 10px;
 				border-radius: 50%;
 				object-fit: cover;
 			}
 			.ln {
-				margin: 10px 0 55px;
+				margin-bottom: 50px;
 				button {
 					width: 80px;
 					margin: 0 15px;
@@ -518,7 +557,6 @@ export default {
 				}
 			}
 			.lo {
-				margin: 10px 0 50px;
 				h3 {
 					text-align: center;
 				}
@@ -545,6 +583,9 @@ export default {
 				text-overflow: ellipsis;
 				box-sizing: border-box;
 				cursor: pointer;
+				&:hover {
+					color: #57a3f3;
+				}
 			}
 			.dn {
 				margin-top: 20px;

@@ -1,0 +1,14 @@
+<template>
+	<div class="activity">
+		<activity-list :naId="2"></activity-list>
+	</div>
+</template>
+
+<script>
+import ActivityList from './list'
+export default {
+	components: {
+		ActivityList
+	}
+}
+</script>

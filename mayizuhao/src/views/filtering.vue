@@ -6,25 +6,26 @@
 					<el-breadcrumb separator-class="el-icon-arrow-right">
 						<el-breadcrumb-item>您的位置</el-breadcrumb-item>
 						<el-breadcrumb-item>租号中心</el-breadcrumb-item>
-						<el-breadcrumb-item>xxx游戏</el-breadcrumb-item>
+						<el-breadcrumb-item>{{ goodsName }}</el-breadcrumb-item>
 					</el-breadcrumb>
+					<a @click="refresh" class="clear">清空筛选条件</a>
 				</div>
 				<div class="sel-cont">
-					<h4>热门手游</h4>
-					<ul class="sel-list">
-						<li v-for="i in 7" :key="i">
-							<el-tooltip class="item" effect="dark" content="英雄联盟" placement="top">
-								<img src="@/assets/hotgame3.jpg" alt="pic">
+					<h4>热门端游</h4>
+					<ul class="sel-list game">
+						<li v-for="item in pcGoodsLen" :key="item.name" @click="selGames(item, 0)">
+							<el-tooltip class="item" effect="dark" :content="item.name" placement="top">
+								<img :src="item.imageUrl" :alt="item.name">
 							</el-tooltip>
 						</li>
 					</ul>
 				</div>
 				<div class="sel-cont">
-					<h4>热门端游</h4>
-					<ul class="sel-list">
-						<li v-for="i in 7" :key="i">
-							<el-tooltip class="item" effect="dark" content="英雄联盟" placement="top">
-								<img src="@/assets/hotgame3.jpg" alt="pic">
+					<h4>热门手游</h4>
+					<ul class="sel-list game">
+						<li v-for="item in moGoodsLen" :key="item.name" @click="selGames(item, 0)">
+							<el-tooltip class="item" effect="dark" :content="item.name" placement="top">
+								<img :src="item.imageUrl" :alt="item.name">
 							</el-tooltip>
 						</li>
 					</ul>
@@ -33,96 +34,350 @@
 					<h4>游戏类型</h4>
 					<ul class="sel-list">
 						<li>
-							<el-select v-model="value" placeholder="选择专区">
-								<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+							<el-popover width="800" placement="bottom-start" v-model="popVisible">
+								<div class="pop-game-cont">
+									<ul class="llist">
+										<li><el-radio @change="selGameCls('游戏_端游')" v-model="radioFro" label="1" border size="small">端游</el-radio></li>
+										<li><el-radio @change="selGameCls('游戏_手游')" v-model="radioFro" label="2" border size="small">手游</el-radio></li>
+									</ul>
+									<ul class="clist">
+										<li v-for="item in gameGoods" :key="item.name" @click="selGames(item)">{{ item.name }}</li>
+									</ul>
+								</div>
+								<el-button size="medium" slot="reference">{{ goodsName }} <i class="el-icon-edit"></i></el-button>
+							</el-popover>
+						</li>
+						<li v-if="gameYGoods.length > 0">
+							<el-select v-model="gameYGoodsPath" @change="selGameY" size="medium" placeholder="请选择">
+								<el-option v-for="item in gameYGoods" :key="item.name" :label="item.name" :value="item.path" />
 							</el-select>
 						</li>
-						<li>
-							<el-select v-model="value" placeholder="选择游戏">
-								<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+						<li v-if="gameEGoods.length > 0">
+							<el-select v-model="gameEGoodsPath" size="medium" placeholder="请选择">
+								<el-option v-for="item in gameEGoods" :key="item.name" :label="item.name" :value="item.path" />
 							</el-select>
 						</li>
-						<li>
-							<el-select v-model="value" placeholder="选择大区">
-								<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
-							</el-select>
-						</li>
-						<li>
-							<el-select v-model="value" placeholder="选择服务器">
-								<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
-							</el-select>
-						</li>
-						<li><el-button type="danger">搜索</el-button></li>
+						<li><el-button @click="gameSearch" type="danger" size="medium">点击搜索</el-button></li>
 					</ul>
 				</div>
 				<div class="sel-cont">
 					<h4>高级选项</h4>
 					<ul class="sel-list sort">
-						<li><button class="active">价格</button></li>
-						<li><button>购买数量</button></li>
+						<li v-for="item in advancedOptions" :key="item.name">
+							<el-popover placement="bottom">
+								<div v-if="item.decide == 1" class="input-number">
+									<el-input-number v-model="minNum" :min="0" size="mini"></el-input-number> ~ <el-input-number v-model="maxNum" :min="0" size="mini"></el-input-number>
+									<el-button @click="addScopeTags(item)" size="mini" class="lt-btn">确定</el-button>
+								</div>
+								<div v-if="item.decide == 2">
+									<el-button v-for="ime in fixedTagsBtnSel" :key="ime" @click="addFixedTags(item.name, ime)" size="mini" class="lt-btn">{{ ime }}</el-button>
+								</div>
+								<div v-if="item.name == '价格排序'">
+									<el-button @click="descFn(2)" size="mini" class="lt-btn">由低到高</el-button>
+									<el-button @click="descFn(1)" size="mini" class="lt-btn">由高到低</el-button>
+								</div>
+								<el-button @click="showFixedTagsShow(item)" slot="reference">{{ item.name }}</el-button>
+							</el-popover>
+						</li>
 					</ul>
 				</div>
 			</div>
 			<div class="filtering-list white-radius">
+				<null-data v-if="goods.length == 0" />
 				<ul>
-					<li v-for="i in 5" :key="i">
+					<li v-for="item in goods" :key="item.code">
 						<div class="ac">
-							<img class="pic" src="@/assets/hotgame3.jpg" alt="pic">
+							<img class="pic" :src="item.imageUrl" alt="pic">
 							<div class="recom">
-								<h3>PO7★5阶鲲套★赐福剪影-世代之影★龙皇泰坦★电光原子灭世者★天神狼王鹰王套★蝎王★星云战车动天使★初霜战斗神翼★初霜摸金符三阶★塔防猎场爆破僵尸齐全★全模式任意体验★</h3>
-								<h4>游戏_端游_逆战_电信区</h4>
+								<h3>{{ item.name }}</h3>
+								<h4>{{ item.typeName }}</h4>
 								<div class="tag">
-									<span v-for="k in 3" :key="k">正常</span>
+									<span>{{ item.stateStr }}</span>
 								</div>
 							</div>
 						</div>
 						<div class="mn">
 							<div class="price">
-								<p>租金：<em>2.34</em>元/时</p>
-								<p>押金：<em>0</em>元</p>
-								<p><em>2</em>小时起租</p>
+								<p>租金：<em>{{ item.timePrice }}</em>元/时</p>
+								<p>押金：<em>{{ item.depositPrice }}</em>元</p>
+								<p><em>{{ item.minTimes }}</em>小时起租</p>
 							</div>
-							<el-button type="primary" size="small" @click="toLease(i)">立即租赁</el-button>
+							<el-button type="primary" size="small" @click="toLease(item.code, item.res)">立即租赁</el-button>
 						</div>
 					</li>
 				</ul>
-				<el-pagination :total="20" :page-size="10" :current-page="1" @current-change="pageChange" background layout="prev, pager, next" />
+				<div v-if="goods.length > 0" class="pagination">
+					<el-pagination :total="pageTotal" :page-size="pageSize" :current-page="pageCurrent" @current-change="pageChange" background layout="prev, pager, next" />
+				</div>
 			</div>
 		</div>
-		<el-backtop></el-backtop>
 	</div>
 </template>
 
 <script>
+import { setTimeout } from 'timers';
 export default {
 	data () {
 		return {
-			options: [{
-				value: '英雄联盟',
-				label: '英雄联盟'
-			}, {
-				value: '地下城与勇士',
-				label: '地下城与勇士'
-			}, {
-				value: 'QQ飞车',
-				label: 'QQ飞车'
-			}],
-			value: '',
-			input: '',
+			pcGoods: [],
+			moGoods: [],
 
-			searchBar: ['sas', 'sd'],
+			popVisible: false,
+			goodsName: '选择游戏',
+			radioFro: '1',
+			gameGoods: [],
+			gameGoodsPath: '',
+			gameYGoods: [],
+			gameYGoodsPath: '',
+			gameEGoods: [],
+			gameEGoodsPath: '',
+
+			advancedOptions: [],
+			fixedTagsObj: {},
+			fixedTagsBtnSel: [],
+			fixedTags: [],
+			scopeTags: [],
+			isDesc: false,
+			minNum: 0,
+			maxNum: 0,
 			
-			pageTotal: 20,
-			pageSize: 10,
-			pageCurrent: 1
+			goods: [],
+			pageTotal: 10,
+			pageSize: 20,
+			pageCurrent: 1,
+		}
+	},
+	created () {
+		// 处理页面传值过来对应各选项 start
+		let _$query = this.$route.query.goodsId;
+		let _$list = [];
+		let _$num = _$query.indexOf('_');
+		let _$vlist = _$query.split('_');
+		while (_$num > -1) {
+			_$list.push(_$num);
+			_$num = _$query.indexOf('_', _$num + 1);
+		}
+		let _$listLen = _$list.length;
+		if (_$listLen >= 2) {
+			this.selGames({
+				name: _$vlist[2],
+				path: _$query.slice(0, _$list[2]),
+			});
+			this.gameGoodsPath = _$query.slice(0, _$list[2]);
+		}
+		if (_$listLen >= 3) {
+			this.selGameY(_$query.slice(0, _$list[3]));
+			this.gameYGoodsPath = _$query.slice(0, _$list[3]);
+		}
+		if (_$listLen >= 4) {
+			this.gameEGoodsPath = _$query;
+		}
+		// end
+		this.$api.post('GetChildrenType', JSON.stringify('游戏_端游'))
+			.then(res => {
+				this.pcGoods = res.obj;
+			})
+		this.$api.post('GetChildrenType', JSON.stringify('游戏_手游'))
+			.then(res => {
+				this.moGoods = res.obj;
+			})
+		this.selGameCls('游戏_端游');
+		this.getSupportScopeTags();
+		this.getSupportFixedTags();
+		this.goodsPage();
+	},
+	computed: {
+		pcGoodsLen () {
+			return this.pcGoods.slice(0, 7);
+		},
+		moGoodsLen () {
+			return this.moGoods.slice(0, 7);
 		}
 	},
 	methods: {
-		pageChange (e) {
-			console.log(e)
+		selGameCls (path) {
+			this.$api.post('GetChildrenType', JSON.stringify(path))
+				.then(res => {
+					this.gameGoods = res.obj;
+				})
 		},
-		toLease (id) {
-			this.$router.push({path: '/lease', query: { id }});
+		selGames (item, index) {
+			this.goodsName = item.name;
+			this.gameGoodsPath = item.path;
+			this.recode();
+			this.$api.post('GetChildrenType', JSON.stringify(item.path))
+				.then(res => {
+					this.gameYGoods = res.obj;
+				})
+			if (index == 0) this.gameSearch();
+		},
+		selGameY (path) {
+			this.$api.post('GetChildrenType', JSON.stringify(path))
+				.then(res => {
+					this.gameEGoods = res.obj;
+				})
+		},
+		// 点击搜索商品
+		gameSearch () {
+			let currentPath = this.$route.path;
+			if (!this.gameEGoodsPath) {
+				if (!this.gameYGoodsPath) {
+					this.$router.replace({path: currentPath, query: {goodsId: this.gameGoodsPath}});
+				} else {
+					this.$router.replace({path: currentPath, query: {goodsId: this.gameYGoodsPath}});
+				}
+			} else {
+				this.$router.replace({path: currentPath, query: {goodsId: this.gameEGoodsPath}});
+			}
+			this.pageCurrent = 1;
+			this.advancedOptions = [];
+			this.getSupportScopeTags();
+			this.getSupportFixedTags();
+			this.goodsPage();
+		},
+		// 获取游戏对应scopeTags列表
+		getSupportScopeTags () {
+			this.$api.post('GetSupportScopeTags', this.$route.query.goodsId)
+				.then(res => {
+					let _list = res.obj;
+					for (let i=0; i<_list.length; i++) {
+						this.advancedOptions.push({
+							name: _list[i],
+							decide: 1
+						});
+					}
+				})
+		},
+		// 获取游戏对应fixedTags列表
+		getSupportFixedTags () {
+			this.$api.post('GetSupportFixedTags', this.$route.query.goodsId)
+				.then(res => {
+					this.fixedTagsObj = res.obj;
+					this.advancedOptions.unshift({
+						name: '价格排序',
+						decide: 2
+					});
+					for (let key in this.fixedTagsObj) {
+						this.advancedOptions.push({
+							name: key,
+							decide: 2
+						});
+					}
+				})
+		},
+		// 高级选择按钮功能
+		showFixedTagsShow (item) {
+			this.minNum = 0;
+			this.maxNum = 0;
+			this.fixedTagsBtnSel = [];
+			if (item.decide == 2) {
+				let _obj = this.fixedTagsObj;
+				if (_obj.hasOwnProperty(item.name)) {
+					for (let key in _obj) {
+						for (let j=0; j<_obj[key].length; j++ ) {
+							this.fixedTagsBtnSel.push(_obj[key][j]);
+						}
+					}
+				}
+			}
+		},
+		// 价格排序
+		descFn (ids) {
+			if (ids == 1) {
+				this.isDesc = true;
+			} else if (ids == 2) {
+				this.isDesc = false;
+			}
+			this.goodsPage();
+		},
+		// 添加商品查询参数scopeTags
+		addScopeTags (item) {
+			if (this.maxNum == 0 && this.minNum == 0) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请选择筛选范围'
+				});
+			} else if (this.minNum > this.maxNum) {
+				this.$notify({
+					title: '温馨提示',
+					message: '结束值不能小于起始值'
+				});
+			} else {
+				let _len = this.scopeTags.length;
+				this.scopeTags.push({
+					name: item.name,
+					startValue: this.minNum,
+					endValue: this.maxNum
+				});
+				for (let i=0; i<_len; i++) {
+					if (item.name == this.scopeTags[i].name) {
+						this.scopeTags.splice(i, 1);
+						break;
+					}
+				}
+				this.goodsPage();
+			}
+		},
+		// 添加商品查询参数fixedTages
+		addFixedTags (name, value) {
+			let _len = this.fixedTags.length;
+			this.fixedTags.push({ name, value });
+			for (let i=0; i<_len; i++) {
+				if (name == this.fixedTags[i].name) {
+					this.fixedTags.splice(i, 1);
+					break;
+				}
+			}
+			this.goodsPage();
+		},
+		// 查询商品
+		goodsPage () {
+			let goodsPar = {
+				goodPath: this.$route.query.goodsId,
+				priceOrder: {
+					flag: true,
+					desc: this.isDesc,
+					index: 0
+				},
+				updateTimeOrder: {
+					flag: true,
+					desc: this.isDesc,
+					index: 0
+				},
+				fixedTages: this.fixedTags,
+				scopeTags: this.scopeTags,
+				itemCount: this.pageSize,
+				pageIndex: (this.pageCurrent - 1)
+			};
+			this.$api.post('GoodPage', goodsPar)
+				.then(res => {
+					this.goods = res.obj.obj;
+					this.pageTotal = res.obj.allItemCount;
+				})
+		},
+		// 商品分页
+		pageChange (e) {
+			this.pageCurrent = e;
+			this.goodsPage();
+		},
+		// 清空筛选
+		refresh () {
+			location.reload();
+		},
+		toLease (id, res) {
+			this.$router.push({path: '/lease', query: {leaseId: id, resId: res}});
+		},
+		// 重新赋值
+		recode () {
+			this.popVisible = false;
+			this.gameYGoods = [];
+			this.gameYGoodsPath = '';
+			this.gameEGoods = [];
+			this.gameEGoodsPath = '';
+			this.fixedTags = [];
+			this.scopeTags = [];
+			this.minNum = 0;
+			this.maxNum = 0;
 		}
 	}
 }
@@ -136,14 +391,25 @@ export default {
 		padding: 10px;
 		box-sizing: border-box;
 		.sel-bar {
+			display: flex;
+			justify-content: space-between;
 			padding: 10px;
+			.el-breadcrumb {
+				margin-right: 100px;
+			}
+			.clear {
+				cursor: pointer;
+				&:hover {
+					color: #409eff;
+				}
+			}
 		}
 		.sel-cont {
 			display: flex;
 			align-items: center;
 			padding: 0 10px;
-			box-sizing: border-box;
 			border-top: 1px solid #eee;
+			box-sizing: border-box;
 			h4 {
 				flex-shrink: 0;
 				width: 100px;
@@ -151,19 +417,26 @@ export default {
 		}
 		.sel-list {
 			display: flex;
+			flex-wrap: wrap;
 			padding: 10px 0;
 			border-left: 1px solid #eee;
 			li {
+				position: relative;
 				padding: 0 15px;
-				box-sizing: border-box;
-			}
-			img {
-				width: 130px;
-				height: 60px;
-				object-fit: cover;
 			}
 			.el-select {
 				width: 150px;
+			}
+			&.game {
+				li {
+					width: 130px;
+					height: 60px;
+				}
+				img {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+				}
 			}
 		}
 		.sort {
@@ -183,6 +456,42 @@ export default {
 					color: #409eff;
 					border-color: #c6e2ff;
 					background-color: #ecf5ff;
+				}
+			}
+			.el-popover {
+				min-width: 50px;
+			}
+		}
+	}
+	.input-number {
+		.lt-btn {
+			margin-left: 10px;
+		}
+	}
+	.pop-game-cont {
+		.llist {
+			display: flex;
+			padding: 10px 0;
+			border-bottom: 1px solid #eee;
+			li {
+				padding: 0 10px;
+				cursor: pointer;
+			}
+		}
+		.clist {
+			display: flex;
+			flex-wrap: wrap;
+			overflow: auto;
+			max-height: 300px;
+			padding: 30px 0;
+			li {
+				width: calc(100% / 5);
+				height: 40px;
+				padding: 0 10px;
+				box-sizing: border-box;
+				cursor: pointer;
+				&:hover {
+					color: #409eff;
 				}
 			}
 		}

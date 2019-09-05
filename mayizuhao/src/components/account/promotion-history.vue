@@ -2,12 +2,14 @@
 	<div class="bills">
 		<div class="account-puc">
 			<el-table :data="tableData" border>
-				<el-table-column prop="cont" label="商品标题" />
-				<el-table-column prop="price" label="订单状态" />
-				<el-table-column prop="time" label="收益" />
-				<el-table-column prop="way" label="订单时间" />
+				<el-table-column prop="title" label="商品标题" />
+				<el-table-column prop="stateStr" label="订单状态" />
+				<el-table-column prop="profitPrice" label="收益" />
+				<el-table-column prop="createTime" label="订单时间" />
 			</el-table>
-			<el-pagination :total="20" :page-size="10" :current-page="1" @current-change="pageChange" background layout="prev, pager, next" />
+			<div v-if="tableData.length > 0" class="pagination">
+				<el-pagination :total="pageTotal" :page-size="pageSize" :current-page="pageCurrent" @current-change="pageChange" background layout="prev, pager, next" />
+			</div>
 		</div>
 	</div>
 </template>
@@ -16,16 +18,33 @@
 export default {
 	data () {
 		return {
-			pageTotal: 20,
-			pageSize: 10,
-			pageCurrent: 1,
+			tableData: [],
 
-			tableData: []
+			pageTotal: 10,
+			pageSize: 10,
+			pageCurrent: 1
 		}
 	},
+	created () {
+		this.cAjax();
+	},
 	methods: {
+		cAjax () {
+			this.$api.post('SpreadRecordPage', {
+				itemCount: this.pageSize,
+				pageIndex: (this.pageCurrent - 1)
+			}).then(res => {
+				let _list = res.obj.obj;
+				_list.forEach(el => {
+					el.createTime = this.$moment(el.createTime).format('YYYY-MM-DD HH:mm:ss')
+				});
+				this.tableData = _list;
+				this.pageTotal = res.obj.allItemCount;
+			})
+		},
 		pageChange (e) {
-			console.log(e)
+			this.pageCurrent = e;
+			this.cAjax();
 		}
 	}
 }

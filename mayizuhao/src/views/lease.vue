@@ -6,16 +6,16 @@
 					<div class="gallery-box">
 						<div class="swiper-container gallery-swiper swiper-no-swiping">
 							<div class="swiper-wrapper">
-								<div v-for="item in 10" :key="item" class="swiper-slide">
-									<img-zoom src="http://files.xubei.com/demon/44c42aabc8a34eda995706f504c3728c.png" bigsrc="http://files.xubei.com/demon/44c42aabc8a34eda995706f504c3728c.png" :configs="configs" width="100%"></img-zoom>
+								<div v-for="(item, index) in goodsInfo.imageUrl" :key="index" class="swiper-slide">
+									<img-zoom :src="item" :bigsrc="item" width="460" height="460" :configs="configs"></img-zoom>
 								</div>
 							</div>
 						</div>
 					</div>
 					<div class="swiper-container gallery-thumbs">
 						<div class="swiper-wrapper">
-							<div v-for="item in 10" :key="item" class="swiper-slide">
-								<img src="@/assets/hotgame3.jpg" alt="pic">
+							<div v-for="(item, index) in goodsInfo.imageUrl" :key="index" class="swiper-slide">
+								<img :src="item" alt="pic">
 							</div>
 						</div>
 					</div>
@@ -24,26 +24,26 @@
 				</div>
 				<div class="lease-utl">
 					<div class="tion">
-						<h3>冠军之刃地下拳王金牌主播原计划剑圣和劫帝王斑蝶冠军之刃地下拳王金牌主播原计划剑圣和劫帝王斑蝶冠军之刃地下拳王金牌主播原计划剑圣和劫帝王斑蝶</h3>
-						<h4>游戏区服：xxxxx</h4>
-						<h4>上号方式：上号器上号</h4>
+						<h3>{{ goodsInfo.name }}</h3>
+						<h4>游戏区服：{{ goodsInfo.goodType.path }}</h4>
+						<h4>上号方式：{{ goodsInfo.goodLoginStr }}</h4>
 					</div>
 					<ul class="dur">
-						<li class="active">
+						<li @click="zuMayFn(1)" :class="{active: zuMayId == 1}">
 							<span>时租</span>
-							<p>1元/时</p>
+							<p>{{ goodsInfo.price.price }}元/时</p>
 						</li>
-						<li>
+						<li v-if="goodsInfo.price.baoTian" @click="zuMayFn(2)" :class="{active: zuMayId == 2}">
 							<span>包天</span>
-							<p>20元/天</p>
+							<p>{{ goodsInfo.price.baoTianPrice }}元/天</p>
 						</li>
 					</ul>
 					<div class="int">
-						<p>押金：0.00元</p>
-						<p>起租时间：1小时起租</p>
-						<div class="am">租赁时长：<el-input-number v-model="leaseNum" @change="countChange" :min="1" :max="100" /></div>
+						<p>押金：{{ goodsInfo.depositPrice }}元</p>
+						<p>起租时间：{{ goodsInfo.price.minCount }}小时起租</p>
+						<div class="am">租赁时长：<el-input-number v-model="leaseNum" @change="countChange" :min="leaseMinNum" :max="leaseMaxNum" /></div>
 						<el-button type="danger" @click="toLeaseOrder">立即租用/在架</el-button>
-						<el-button v-if="isShowLtc == '绝地求生'" @click="toZone" class="fc">免费玩此游戏</el-button>
+						<el-button v-if="isSpread && isShowLtc == '绝地求生'" @click="toZone" class="fc">免费玩此游戏</el-button>
 					</div>
 				</div>
 			</div>
@@ -52,18 +52,13 @@
 					<el-tab-pane label="帐号信息" name="1">
 						<div class="info-main">
 							<ul class="act">
-								<li>
-									<h3>英雄级道具数：</h3>
-									<p>50</p>
-								</li>
-								<li>
-									<h3>主武器：</h3>
-									<p>xk，50V4烈+死亡+葵+王者瞳,幻兽系列，狙击（毁灭加天龙+极光），英雄步枪（千变加火麒麟+无影+超新星加黑骑士）王者★炫金火麒麟★炫金骑士★炫金修罗★烈龙悦心★裁决★死神★黑骑士★雷神★龙啸★稳定不挤号老板玩的开心</p>
+								<li v-for="(item, key) in goodsInfo.tags" :key="key">
+									<h3>{{ key }}：</h3>
+									<p>{{ item }}</p>
 								</li>
 							</ul>
 							<!-- 判断显示 start -->
-							<!-- 英雄联盟 -->
-							<div v-if="isShowLtc == '英雄联盟' || isShowLtc == '穿越火线'" class="bar"><em></em>账号概要</div>
+							<!-- <div v-if="isShowLtc == '英雄联盟' || isShowLtc == '穿越火线'" class="bar"><em></em>账号概要</div>
 							<ul v-if="isShowLtc == '英雄联盟'" class="syn">
 								<li>
 									<img src="@/assets/so5.png" width="231" height="136" alt="pic">
@@ -94,7 +89,6 @@
 									</div>
 								</li>
 							</ul>
-							<!-- 穿越火线 -->
 							<ul v-if="isShowLtc == '穿越火线'" class="syn">
 								<li>
 									<img src="@/assets/so1.png" width="231" height="92" alt="pic">
@@ -124,17 +118,17 @@
 										<h4>目前等级</h4>
 									</div>
 								</li>
-							</ul>
+							</ul> -->
 							<!-- end -->
 							<div class="bar"><em></em>账号描述</div>
 							<div class="des">
-								<p>王者★炫金火麒麟★炫金骑士★炫金修罗★烈龙悦心★裁决★死神★黑骑士★雷神★龙啸★稳定不挤号老板玩的开心王者★炫金火麒麟★炫金骑士★炫金修罗★烈龙悦心★裁决★死神★黑骑士★雷神★龙啸★稳定不挤号老板玩的开心</p>
+								<p>{{ goodsInfo.summary }}</p>
 							</div>
 							<div class="bar"><em></em>账号截图</div>
-							<div class="lease-carousel index-carousel">
-								<el-carousel trigger="click" :interval="5000" height="380px">
-									<el-carousel-item v-for="item in 4" :key="item">
-										<img src="https://img.myzuhao.top/5cdbab19b8bed69358.png" alt="pic">
+							<div class="lease-carousel">
+								<el-carousel trigger="click" :interval="5000">
+									<el-carousel-item v-for="(item, index) in goodsInfo.imageUrl" :key="index">
+										<img :src="item" alt="pic">
 									</el-carousel-item>
 								</el-carousel>
 							</div>
@@ -142,13 +136,12 @@
 					</el-tab-pane>
 					<el-tab-pane label="租号须知" name="2">
 						<div class="info-data">
-							租号须知
+							租号须知 --- 会有很长很长一段文档
 						</div>
 					</el-tab-pane>
 				</el-tabs>
 			</div>
 		</div>
-		<el-backtop></el-backtop>
 	</div>
 </template>
 
@@ -162,41 +155,104 @@ export default {
 	},
 	data () {
 		return {
+			goodsInfo: {
+				goodType: {},
+				price: {},
+				user: {}
+			},
+			isSpread: false,
+			tagsInfo: [],
+			zuMayId: 1,
 			leaseNum: 1,
+			leaseMinNum: 1,
+			leaseMaxNum: 1000,
+
 			tabsActive: '1',
-			isShowLtc: '绝地求生',
+			isShowLtc: '',
+
 			configs: {
 				width: 650,
 				height: 350,
 				maskWidth: 100,
 				maskHeight: 100,
 				maskColor: 'red',
-				maskOpacity: 0.2
+				maskOpacity: 0.3
 			}
 		}
 	},
-	mounted () {
-		var galleryThumbs = new Swiper('.gallery-thumbs', {
-			spaceBetween: 10,
-			slidesPerView: 5,
-			watchSlidesVisibility: true
-		});
-		var gallerySwiper = new Swiper('.gallery-swiper', {
-			navigation: {
-				nextEl: '.swiper-button-next',
-				prevEl: '.swiper-button-prev',
-			},
-			thumbs: {
-				swiper: galleryThumbs,
-			}
+	created () {
+		this.$api.post('CheckSpreadCode', JSON.stringify(sessionStorage.getItem('spreadCode')))
+			.then(res => {
+				this.isSpread = true;
+			});
+		this.$api.post('GoodInfo', {
+			code: this.$route.query.leaseId,
+			res: this.$route.query.resId
+		}).then(res => {
+			this.goodsInfo = res.obj;
+			this.leaseNum = this.goodsInfo.price.minCount;
+			this.leaseMinNum = this.goodsInfo.price.minCount;
+			if (this.goodsInfo.price.maxCount > 0) this.leaseMaxNum = this.goodsInfo.price.maxCount;
+			this.isShowLtc = (this.goodsInfo.goodType.path).split('_')[2];
+
+			this.$nextTick().then(() => {
+				var galleryThumbs = new Swiper('.gallery-thumbs', {
+					spaceBetween: 10,
+					slidesPerView: 5,
+					watchSlidesVisibility: true
+				});
+				var gallerySwiper = new Swiper('.gallery-swiper', {
+					navigation: {
+						nextEl: '.swiper-button-next',
+						prevEl: '.swiper-button-prev',
+					},
+					thumbs: {
+						swiper: galleryThumbs,
+					}
+				})
+			})
 		})
 	},
 	methods: {
+		zuMayFn (e) {
+			this.zuMayId = e;
+		},
 		countChange (e) {
-			console.log(e);
+			this.leaseNum = e;
 		},
 		toLeaseOrder () {
-			this.$router.push({path: '/lease-order', query: { id: 0 }});
+			// 默认小时
+			let createOrder = {
+				goodCode: this.goodsInfo.code,
+				userID: this.goodsInfo.user.id,
+				res: this.goodsInfo.res,
+				count: this.leaseNum,
+				baotianFlag: false
+			}
+			// 包天
+			if (this.zuMayId == 2) {
+				createOrder.count = 0;
+				createOrder.baotianFlag = true;
+			}
+			this.$api.post('CreateOrder', JSON.stringify(createOrder))
+				.then(res => {
+					let _data = res.obj;
+					sessionStorage.setItem('leaseOrder', JSON.stringify({
+						goodPath: _data.goodPath,
+						createTime: _data.createTime,
+						price: _data.price,
+						leaseWay: (this.zuMayId == 2)? '天':'小时',
+						goodLoginStr: _data.goodLoginStr,
+						leaseTime: this.leaseNum,
+						startTime: _data.startTime,
+						endTime: _data.endTime,
+						orderPrice:  (_data.price * this.leaseNum),
+						deposit: _data.deposit,
+						payPrice: _data.payPrice,
+						orderCode: _data.orderCode
+					}));
+					this.$router.push('/lease-order');
+				});
 		},
 		toZone () {
 			this.$router.push('/zone');
@@ -223,17 +279,9 @@ export default {
 	.gallery-box {
 		display: flex;
 		align-items: center;
-		height: 460px;
 		background: #eee;
     	border: 1px solid #dedede;
 		box-sizing: border-box;
-	}
-	.gallery-swiper {
-		img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-		}
 	}
 	.gallery-thumbs {
 		width: 400px;
@@ -290,11 +338,12 @@ export default {
 				margin-right: 10px;
 				box-sizing: border-box;
 				cursor: pointer;
-				&:hover p{
-					border-color: #ff5f5f;
-				}
+				// &:hover p{
+				// 	border-color: #ff5f5f;
+				// }
 				&.active p{
 					border-color: #ff5f5f;
+					color: #ff5f5f;
 				}
 			}
 			span {
@@ -307,7 +356,7 @@ export default {
 			}
 			p {
 				padding: 20px 0;
-				color: #ff5f5f;
+				color: #d9d9d9;
 				font-size: 16px;
 				text-align: center;
 				border: 1px solid #d9d9d9;
@@ -410,9 +459,13 @@ export default {
 		}
 	}
 	.lease-carousel {
-		width: 840px;
+		width: 800px;
+		height: 500px;
 		padding-top: 30px;
 		margin: 0 auto;
+		.el-carousel {
+			height: 100%;
+		}
 		img {
 			width: 100%;
 		}

@@ -18,7 +18,7 @@
 				</ul>
 			</div>
 			<el-tabs v-model="tabsActive" @tab-click="tabsClick">
-				<el-tab-pane v-for="item in tabsArr" :key="item.name" :label="item.label" :name="item.name">
+				<el-tab-pane v-for="item in tabsArr" :key="item" :label="item" :name="item">
 					<div class="order-info">
 						<div v-if="tabsActive == '可租赁'" class="btns">
 							<el-button size="small">下架</el-button>
@@ -54,7 +54,7 @@
 								<el-table-column label="帐号信息">
 									<template slot-scope="scope">
 										<div class="dot">
-											<img src="@/assets/hotgame3.jpg" alt="pic">
+											<img src="@/assets/activity2.jpg" alt="pic">
 											<div>
 												<h3><el-tooltip effect="dark" content="该商品已加入免费专区，用户租号费用由蚂蚁补贴" placement="top"><em>免</em>
 												</el-tooltip>{{ scope.row.name }}</h3>
@@ -94,7 +94,9 @@
 					</div>
 				</el-tab-pane>
 			</el-tabs>
-			<el-pagination :total="20" :page-size="10" :current-page="1" @current-change="pageChange" background layout="prev, pager, next" />
+			<div class="pagination">
+				<el-pagination :total="pageTotal" :page-size="pageSize" :current-page="pageCurrent" @current-change="pageChange" background layout="prev, pager, next" />
+			</div>
 		</div>
 		<el-dialog custom-class="pay-dialog" title="修改密码" :visible.sync="dialogVisible" @close="dialogClose" width="500px">
 			<el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="form-label-12">
@@ -135,10 +137,10 @@ export default {
 			}
 		};
 		return {
-			datePicker: '',
-			tabsActive: '全部',
+			datePicker: null,
 			dialogVisible: false,
 			isShowtableCheckbox: false,
+
 			ruleForm: {
 				pass: '',
 				checkPass: '',
@@ -152,59 +154,99 @@ export default {
 				]
 			},
 
-			tabsArr: [{
-				name: '全部',
-				label: '全部'
-			}, {
-				name: '待审核',
-				label: '待审核'
-			}, {
-				name: '可租赁',
-				label: '可租赁'
-			}, {
-				name: '仓库中',
-				label: '仓库中'
-			}, {
-				name: '出租中',
-				label: '出租中'
-			}, {
-				name: '已置顶',
-				label: '已置顶'
-			}, {
-				name: '展示到渠道',
-				label: '展示到渠道'
-			}, {
-				name: '不展示到渠道',
-				label: '不展示到渠道'
-			}],
-			tableData: [{
-				name: '游戏昵称',
-				price: '￥1.00/小时',
-				cash: '￥0.00',
-				status: '展示中',
-			}, {
-				name: '游戏昵称',
-				price: '￥1.00/小时',
-				cash: '￥0.00',
-				status: '展示中',
-			}],
+			tabsActive: '全部',
+			tabsArr: ['全部', '待审核', '可租赁', '仓库中', '出租中', '已置顶', '展示到渠道', '不展示到渠道'],
+			tableData: [
+				// {
+				// 	name: '游戏昵称',
+				// 	price: '￥1.00/小时',
+				// 	cash: '￥0.00',
+				// 	status: '展示中',
+				// }, {
+				// 	name: '游戏昵称',
+				// 	price: '￥1.00/小时',
+				// 	cash: '￥0.00',
+				// 	status: '展示中',
+				// }
+			],
 			
-			pageTotal: 20,
+			pageTotal: 10,
 			pageSize: 10,
 			pageCurrent: 1
 		}
 	},
+	created () {
+		this.cAjax();
+	},
 	methods: {
+		cAjax () {
+			let _params = {
+				orderState: this.orderStateNum,
+				itemCount: this.pageSize,
+				pageIndex: (this.pageCurrent - 1),
+				createTimeOrder: {
+					flag: true,
+					desc: true,
+					index: 0
+				}
+			};
+			if (this.datePicker) {
+				_params = Object.assign({
+					createTime: {
+						startTime: this.datePicker[0],
+						startTimeStr: this.datePicker[0],
+						endTime: this.datePicker[1],
+						endTimeStr: this.datePicker[1],
+					}
+				}, _params);
+			}
+			this.$api.post('SellGoodPage', _params)
+				.then(res => {
+					console.log(res)
+					// this.tableData = res.obj.obj;
+					// this.pageTotal = res.obj.allItemCount;
+				})
+		},
 		datePickerChange (e) {
-			console.log(this.$formatDateTime(e[0]))
-			console.log(this.$formatDateTime(e[1]))
+			if (e) {
+				let _arr = [];
+				e.forEach(el => {
+					_arr.push(this.$moment(el).format('YYYY-MM-DD HH:mm:ss'));
+				});
+				this.datePicker = _arr;
+			}
+			this.pageCurrent = 1;
 		},
 		tabsClick (e) {
-			if (e.name == '可租赁' || e.name == '仓库中' || e.name == '已置顶' || e.name == '展示到渠道' || e.name == '不展示到渠道') {
-				this.isShowtableCheckbox = true;
-			} else {
-				this.isShowtableCheckbox = false;
+			let _index = parseInt(e.index);
+			switch (_index) {
+				case 0:
+					break;
+				case 1:
+					break;
+				case 2:
+					this.isShowtableCheckbox = true;
+					break;
+				case 3:
+					this.isShowtableCheckbox = true;
+					break;
+				case 4:
+					break;
+				case 5:
+					this.isShowtableCheckbox = true;
+					break;
+				case 6:
+					this.isShowtableCheckbox = true;
+					break;
+				case 7:
+					this.isShowtableCheckbox = true;
+					break;
+				default:
+					this.isShowtableCheckbox = false;
+					break;
 			}
+			this.pageCurrent = 1;
+			this.cAjax();
 		},
 		handleSelectionChange(e) {
 			console.log(e);
@@ -222,9 +264,6 @@ export default {
 				if (valid) {
 					console.log(this.ruleForm);
 					this.dialogVisible = false;
-				} else {
-					console.log('error submit.');
-					return false;
 				}
 			});
 		},
@@ -232,7 +271,7 @@ export default {
 			this.$refs['ruleForm'].resetFields();
 		},
 		pageChange (e) {
-			console.log(e)
+			this.pageCurrent = e;
 		}
 	}
 }

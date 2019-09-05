@@ -32,7 +32,6 @@
 				<router-view />
 			</div>
 		</div>
-		<el-backtop></el-backtop>
 	</div>
 </template>
 
@@ -41,28 +40,30 @@ export default {
 	data () {
 		return {
 			accountPath: '',
-			userRoles: ['专区', '管理员'],
 			showPromotionStore: false
 		}
 	},
 	created () {
-		this.accountPath = sessionStorage.getItem('account-path');
-		for (let i = 0; i < this.userRoles.length; i++) {
-			if (this.userRoles[i] == '专区' || this.userRoles[i] == '管理员') {
-				this.showPromotionStore = true;
-			}
-		}
+		this.accountPath = this.$route.query.accountPath;
+		this.$api.post('GetRoles')
+			.then(res => {
+				let roles = res.obj;
+				for (let i = 0; i < roles.length; i++) {
+					if (roles[i] == '专区' || roles[i] == '管理员') {
+						this.showPromotionStore = true;
+					}
+				}
+			})
 	},
 	methods: {
 		menuChange (index) {
-            document.documentElement.scrollTop = document.body.scrollTop = 0;
-			this.$router.push(index);
+			this.accountPath = index;
+			this.$router.push({path: index, query: {accountPath: index}});
 		}
 	},
 	watch: {
 		$route (to, from) {
-			this.accountPath = to.path;
-			sessionStorage.setItem('account-path', to.path);
+			this.accountPath = to.query.accountPath;
 		}
 	}
 }
@@ -117,7 +118,7 @@ export default {
 		display: flex;
 		align-items: center;
 		padding: 20px 0;
-		margin: 25px 0;
+		margin: 20px 0;
 		border-top: 1px solid #e8eaec;
 		border-bottom: 1px solid #e8eaec;
 	}
@@ -131,13 +132,6 @@ export default {
 				min-width: 100px;
 				margin-right: 10px;
 				text-align: right;
-			}
-			.al {
-				padding: 0 30px;
-				background: #fff;
-				border: 1px solid #409EFF;
-				line-height: 32px;
-				border-radius: 3px;
 			}
 			a {
 				color: #409EFF;
@@ -188,15 +182,16 @@ export default {
 		.order-cont {
 			display: flex;
 			align-items: center;
-			height: 130px;
+			height: 110px;
+			min-height: 110px;
 			.cont {
 				display: flex;
 				padding: 15px;
 				box-sizing: border-box;
 				.pic {
 					flex-shrink: 0;
-					width: 100px;
-					height: 100px;
+					width: 80px;
+					height: 80px;
 					margin-right: 10px;
 					background-repeat: no-repeat;
 					background-size: cover;
@@ -205,14 +200,13 @@ export default {
 				}
 				.te {
 					h4 {
-						overflow: hidden;
-						display: -webkit-box;
-						-webkit-box-orient: vertical;
-						-webkit-line-clamp: 3;
-						word-break: break-all;
 						margin-bottom: 10px;
 						line-height: 1.3;
 						font-weight: bold;
+						word-break: break-all;
+					}
+					p {
+						line-height: 1.3;
 					}
 				}
 			}
@@ -261,6 +255,29 @@ export default {
 			flex-direction: column;
 			justify-content: center;
 			align-items: center;
+		}
+	}
+
+	.change-pass-main {
+		width: 520px;
+		.radio {
+			padding: 0 0 20px 100px;
+		}
+		.row-item {
+			display: inline-block;
+		}
+		.phone {
+			.el-input {
+				width: 165px;
+			}
+		}
+		.sms {
+			.el-input {
+				width: 100px;
+			}
+		}
+		.send-sms {
+			margin: 1px 0 0 20px;
 		}
 	}
 </style>

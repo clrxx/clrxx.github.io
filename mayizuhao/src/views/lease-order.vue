@@ -2,37 +2,37 @@
 	<div class="lease-order bc-f5f7f9">
 		<div class="lease-order-main wh-1300 white-radius">
 			<el-table :data="tableData" border>
-				<el-table-column prop="cont" label="商品详情" width="500" />
-				<el-table-column prop="time" label="起租时间" />
-				<el-table-column prop="price" label="单价" />
-				<el-table-column prop="way" label="收费方式" />
+				<el-table-column prop="goodPath" label="商品详情" width="500" />
+				<el-table-column prop="createTime" label="起租时间" />
+				<el-table-column prop="price" label="单价（元/时）" />
+				<el-table-column prop="leaseWay" label="收费方式" />
 			</el-table>
 			<div class="cont">
 				<ul class="clse">
-					<li><span>租号方式：</span>现在租</li>
-					<li><span>租赁时间：</span>24小时</li>
-					<li><span>可租时间段：</span>0:00 ~ 23:00</li>
+					<li><span>租号方式：</span>{{ leaseOrder.goodLoginStr }}</li>
+					<li><span>租赁时间：</span>{{ leaseOrder.leaseTime }}小时</li>
+					<li><span>可租时间段：</span>00:00 ~ 23:00</li>
 				</ul>
 				<ul class="price">
 					<li><em />
 						<div class="cash">
 							<span>订单金额：</span>
-							<p>￥0</p>
+							<p>￥{{ leaseOrder.orderPrice }}</p>
 						</div>
 					</li>
 					<li>
 						<h5>提示：您的押金会在订单完成后24小时内退回您的蚂蚁租号账户。</h5>
 						<div class="cash">
 							<span>订单押金：</span>
-							<p>￥0</p>
+							<p>￥{{ leaseOrder.deposit }}</p>
 							<!-- <p><el-tooltip class="item" effect="dark" content="提示：您的押金会在订单完成后24小时内退回您的蚂蚁租号账户。" placement="left">
-								<img src="@/assets/question.png" alt="pic">
+								<img src="@/assets/question.png" alt="icon">
 							</el-tooltip>￥0</p> -->
 						</div>
 					</li>
 				</ul>
 				<div class="pay">
-					<p>实付总额(含押金)：<span>￥0</span></p>
+					<p>实付总额(含押金)：<span>￥{{ leaseOrder.payPrice }}</span></p>
 					<el-button type="danger" @click="dialogVisible = true">去付款</el-button>
 				</div>
 			</div>
@@ -51,28 +51,40 @@
 export default {
 	data() {
 		return {
+			leaseOrder: {},
 			dialogVisible: false,
-			tableData: [{
-				cont: '英雄联盟',
-				time: '2019.6-2019.6',
-				price: 3,
-				way: '小时'
-			}]
+			tableData: []
 		}
+	},
+	created () {
+		document.documentElement.style.overflowY = 'hidden';
+		if (!sessionStorage.getItem('leaseOrder')) {
+			this.$router.push('/');
+			return false;
+		}
+		this.leaseOrder = JSON.parse(sessionStorage.getItem('leaseOrder'));
+		this.tableData.push({
+			goodPath: this.leaseOrder.goodPath,
+			createTime: this.$moment(this.leaseOrder.createTime).format('YYYY-MM-DD HH:mm:ss'),
+			price: this.leaseOrder.price,
+			leaseWay: this.leaseOrder.leaseWay
+		});
 	},
 	methods: {
 		toLeasePay () {
-			this.$router.push({path: '/lease-pay', query: {
-				id: 0
-			}});
+			this.$router.push('/lease-pay');
 		}
+	},
+	beforeDestroy () {
+		console.log('/lease-order销毁');
+		document.documentElement.style.overflowY = 'auto';
 	}
 }
 </script>
 
 <style lang="scss" scoped>
 	.lease-order {
-		height: calc(100vh - 172px);
+		height: 100vh;
 	}
 	.lease-order-main {
 		padding: 15px;

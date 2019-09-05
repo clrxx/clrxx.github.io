@@ -2,11 +2,11 @@
 	<div class="account-index">
 		<div class="account-info white-radius">
 			<div class="info">
-				<img src="@/assets/default-avatar.png" alt="pic">
-				<p>昵称</p>
+				<img :src="userInfo.headImage" alt="pic">
+				<p>{{ userInfo.name }}</p>
 			</div>
 			<div class="mo">
-				<p>我的余额<span>￥0</span></p>
+				<p>余额：<span>{{ userInfo.hashCash }}元</span></p>
 			</div>
 			<div class="btns">
 				<el-button @click="toAccountPay" type="primary" size="small">我要充值</el-button><br>
@@ -18,22 +18,27 @@
 				<h3>结论</h3>
 			</div>
 			<ul class="summing-list">
-				<li class="item1"><span>0</span>租号次数</li>
-				<li class="item2"><span>0</span>成功租号次数</li>
-				<li class="item3"><span>0</span>维权次数</li>
-				<li class="item4"><span>100%</span>订单成功率</li>
+				<li class="item1"><span>{{ cash.orderCount }}</span>租号次数</li>
+				<li class="item2"><span>{{ cash.orderSuccessCount }}</span>成功租号次数</li>
+				<li class="item3"><span>{{ cash.orderRight }}</span>维权次数</li>
+				<li class="item4"><span>{{ rate }}</span>订单成功率</li>
 			</ul>
 		</div>
 		<div class="sys white-radius">
 			<div class="account-title-small">
 				<h3>系统通知</h3>
 			</div>
-			<div class="null-data">暂无相关信息</div>
+			<null-data v-if="msgInfo == 0" />
 			<div class="sys-info">
 				<ul class="sys-list">
-					<li></li>
+					<li v-for="item in msgInfo" :key="item.id">
+						<h3>{{ item.title }}</h3>
+						<p>{{ item.createTime | formatDateTime }}</p>
+					</li>
 				</ul>
-				<el-pagination :total="20" :page-size="10" :current-page="1" @current-change="pageChange" background layout="prev, pager, next" />
+				<div v-if="msgInfo > 0" class="pagination">
+					<el-pagination :total="pageTotal" :page-size="pageSize" :current-page="pageCurrent" @current-change="pageChange" background layout="prev, pager, next" />
+				</div>
 			</div>
 		</div>
 	</div>
@@ -43,20 +48,48 @@
 export default {
 	data () {
 		return {
-			pageTotal: 20,
+			userInfo: {},
+			cash: {},
+			rate: '100%',
+			msgInfo: [],
+
+			pageTotal: 10,
 			pageSize: 10,
 			pageCurrent: 1
 		}
 	},
+	created () {
+		this.$api.post('BaseInfo')
+			.then(res => {
+				this.userInfo = res.obj;
+			});
+		this.$api.post('Cash')
+			.then(res => {
+				this.cash = res.obj;
+				this.rate = (this.cash.orderSuccessCount/this.cash.orderCount).toFixed(2)*100 +'%';
+			});
+		this.mAjax();
+	},
 	methods: {
+		mAjax () {
+			this.$api.post('MsgPage', {
+				itemCount: this.pageSize,
+				pageIndex: (this.pageCurrent - 1)
+			}).then(res => {
+				let _data = res.obj;
+				this.msgInfo = _data.obj;
+				this.pageTotal = _data.pageCount;
+			});
+		},
 		toAccountPay () {
-			this.$router.push('/account/pay');
+			this.$router.push({path: '/account/pay', query: {accountPath: '/account'}});
 		},
 		toAccountRefund () {
-			this.$router.push('/account/refund');
+			this.$router.push({path: '/account/refund', query: {accountPath: '/account'}});
 		},
 		pageChange (e) {
-			console.log(e)
+			this.pageCurrent = e;
+			this.mAjax();
 		}
 	}
 }
@@ -125,7 +158,31 @@ export default {
 	}
 	.sys-list {
 		li {
-			padding: 10px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 10px 15px;
+			border-bottom: 1px dashed #e8eaec;
+			transition: all .3s;
+			cursor: default;
+			&:last-of-type {
+				border-bottom: 1px solid #e8eaec;
+			}
+			&:hover {
+				background: #f5f7f9;
+			}
+			h3 {
+				overflow: hidden;
+				width: 500px;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				line-height: 1.3;
+			}
+			p {
+				flex-shrink: 0;
+				padding-left: 20px;
+				font-size: 12px;
+			}
 		}
 	}
 </style>

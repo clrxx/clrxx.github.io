@@ -5,15 +5,15 @@
 				<div class="zone-see-swiper">
 					<div class="swiper-container gallery-swiper">
 						<div class="swiper-wrapper">
-							<div v-for="item in 10" :key="item" class="swiper-slide">
-								<img src="@/assets/hotgame3.jpg" alt="pic">
+							<div v-for="item in zoneDot.imageUrls" :key="item" class="swiper-slide">
+								<img :src="item" alt="pic">
 							</div>
 						</div>
 					</div>
 					<div class="swiper-container gallery-thumbs">
 						<div class="swiper-wrapper">
-							<div v-for="item in 10" :key="item" class="swiper-slide">
-								<img src="@/assets/hotgame3.jpg" alt="pic">
+							<div v-for="item in zoneDot.imageUrls" :key="item" class="swiper-slide">
+								<img :src="item" alt="pic">
 							</div>
 						</div>
 					</div>
@@ -21,16 +21,16 @@
 					<div class="swiper-button-prev swiper-button-white"></div>
 				</div>
 				<div class="zone-see-ill">
-					<div>
-						<img src="@/assets/hotgame3.jpg" alt="pic">
-						<p>绝地求生(PLAYERUNKNOWN’S BATTLEGROUNDS)是战术竞技类型的游戏，每一局游戏将有100名玩家参与，他们将被投放在绝地岛(battlegrounds)的上空，游戏开始跳伞时所有人都一无所有。</p>
+					<div class="ill-pic">
+						<img :src="zoneDot.images" alt="pic">
+						<p>{{ zoneDot.summary }}</p>
 					</div>
-					<div>
-						<h3>绝地求生</h3>
+					<div class="ill-way">
+						<h3>{{ zoneDot.name }}</h3>
 						<h4>每次试玩最多三小时，结束后可再次试玩</h4>
 						<div class="lease">租赁时间：
 							<el-select v-model="LeaseNum" size="small" placeholder="选择租赁时间">
-								<el-option v-for="item in Lease" :key="item.value" :label="item.label" :value="item.value" />
+								<el-option v-for="item in Lease" :key="item" :label="item" :value="item" />
 							</el-select>
 						</div>
 						<button @click="freePlay">免费玩</button>
@@ -38,26 +38,19 @@
 				</div>
 			</div>
 			<div class="zone-datail-cont">
-				<p>绝地求生(PLAYERUNKNOWN’S BATTLEGROUNDS)是战术竞技类型的游戏，每一局游戏将有100名玩家参与，他们将被投放在绝地岛(battlegrounds)的上空，游戏开始跳伞时所有人都一无所有。绝地求生(PLAYERUNKNOWN’S BATTLEGROUNDS)是战术竞技类型的游戏，每一局游戏将有100名玩家参与，他们将被投放在绝地岛(battlegrounds)的上空，游戏开始跳伞时所有人都一无所有。绝地求生(PLAYERUNKNOWN’S BATTLEGROUNDS)是战术竞技类型的游戏，每一局游戏将有100名玩家参与，他们将被投放在绝地岛(battlegrounds)的上空，游戏开始跳伞时所有人都一无所有。绝地求生(PLAYERUNKNOWN’S BATTLEGROUNDS)是战术竞技类型的游戏，每一局游戏将有100名玩家参与，他们将被投放在绝地岛(battlegrounds)的上空，游戏开始跳伞时所有人都一无所有。
-				111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</p>
-				<p><img src="@/assets/hotgame3.jpg" alt="pic"></p>
-				<span>dsdsd1545</span>
-				<h2>dsdsd1545</h2>
-				<h6>dsdsd1545</h6>
+				<null-data v-if="!zoneDot.html" />
+				<div v-html="zoneDot.html"></div>
 			</div>
 		</div>
 		<transition name="el-fade-in">
-			<div v-if="isShowMask" class="zone-mask">
-				<div class="zone-mask-main">
-					<img class="pic1" src="@/assets/dada1.jpg">
-					<img class="pic2" src="@/assets/dada2.png">
-					<input v-model="internetName" placeholder="请输入网吧（咖）名称" />
-					<p>该网吧（咖）为特权试用阶段，填写网吧（咖）名称<br>我们将联系该网吧（咖）开通特权，永久畅玩</p>
-					<img @click="putInternetName" class="btn" src="@/assets/dadabtn.png">
+			<div v-if="isShowMask" @click="hideMaskFn" class="zone-mask">
+				<div @click.stop class="zone-mask-main">
+					<img src="@/assets/z-dot-is-qt.png">
+					<input v-model="internetName" placeholder="请输入网吧名称" />
+					<img @click="putInternetName" class="btn" src="@/assets/z-dot-is-btn.png">
 				</div>
 			</div>
 		</transition>
-		<el-backtop></el-backtop>
 	</div>
 </template>
 
@@ -67,69 +60,77 @@ import 'swiper/dist/css/swiper.min.css';
 export default {
 	data () {
 		return {
+			zoneDot: {},
 			isShowMask: false,
 			internetName: '',
-			Lease: [{
-				value: 1,
-				label: 1
-			}, {
-				value: 2,
-				label: 2
-			}, {
-				value: 3,
-				label: 3
-			}],
+			Lease: [1, 2, 3],
 			LeaseNum: 1
 		}
 	},
-	mounted () {
-		var galleryThumbs = new Swiper('.gallery-thumbs', {
-			spaceBetween: 10,
-			slidesPerView: 5,
-			watchSlidesVisibility: true
-		});
-		var gallerySwiper = new Swiper('.gallery-swiper', {
-			navigation: {
-				nextEl: '.swiper-button-next',
-				prevEl: '.swiper-button-prev',
-			},
-			thumbs: {
-				swiper: galleryThumbs,
-			}
-		})
+	created () {
+		this.$api.post('GoodOrderSpc_GetInfo', this.$route.query.zoneId)
+			.then(res => {
+				this.zoneDot = res.obj;
+
+				this.$nextTick().then(()=> {
+					var galleryThumbs = new Swiper('.gallery-thumbs', {
+						spaceBetween: 10,
+						slidesPerView: 5,
+						watchSlidesVisibility: true
+					});
+					var gallerySwiper = new Swiper('.gallery-swiper', {
+						navigation: {
+							nextEl: '.swiper-button-next',
+							prevEl: '.swiper-button-prev',
+						},
+						thumbs: {
+							swiper: galleryThumbs,
+						}
+					})
+				})
+			})
 	},
 	methods: {
+		toPaymentDetail () {
+			this.$api.post('GoodOrderSpc_CreateOrder', {
+				id: this.$route.query.zoneId,
+				count: this.LeaseNum
+			}).then(res => {
+				this.$router.push({path: '/payment', query: {orderCode: res.obj.orderCode}});
+			})
+		},
 		freePlay () {
-			let zoneTm = localStorage.getItem('zoneTm');
-			if (zoneTm == '' && zoneTm == null && zoneTm == undefined && zoneTm =='undefined') {
-				document.documentElement.style.overflow = 'hidden';
-				this.isShowMask = true;
-			} else {
-				let today = new Date().getTime();
-				if (today > zoneTm) {
-					document.documentElement.style.overflow = 'hidden';
-					this.isShowMask = true;
-				} else {
-					this.toPaymentDetail();
-				}
-			}
+			this.$api.postAll('CheckWangbaInfo')
+				.then(res => {
+					if (res.flag) {
+						this.toPaymentDetail();
+					} else {
+						this.isShowMask = true;
+						document.documentElement.style.overflow = 'hidden';
+					}
+				})
 		},
 		putInternetName () {
 			if (!this.internetName) {
-				this.$notify.info({
+				this.$notify({
 					title: '温馨提示',
-					message: '请输入网吧（咖）名称'
+					message: '请输入网吧名称'
 				});
-			} else {
-				this.isShowMask = false;
-				document.documentElement.style.overflow = 'auto';
-				let zoneTm = new Date().getTime() + (24*60*60*1000);
-				localStorage.setItem('zoneTm', zoneTm);
-				this.toPaymentDetail();
+				return false;
 			}
+			this.$api.post('AddWangbaInfo', JSON.stringify(this.internetName)).then(res => {
+				this.$notify({
+					title: '温馨提示',
+					message: '网吧名称提交成功'
+				});
+				setTimeout(() => {
+					this.$router.push('/');
+				}, 1000)
+			})	
 		},
-		toPaymentDetail () {
-			this.$router.push({path: '/payment-detail', query: { id: 1 }});
+		hideMaskFn () {
+			this.isShowMask = false;
+			document.documentElement.style.overflow = 'auto';
 		}
 	}
 }
@@ -153,7 +154,7 @@ export default {
 		user-select: none;
 	}
 	.gallery-swiper {
-		height: 420px;
+		height: 450px;
 		img {
 			width: 100%;
 			height: 100%;
@@ -178,7 +179,7 @@ export default {
 	}
 	.swiper-button-next, 
 	.swiper-button-prev {
-		top: 89.5% !important;
+		top: 90% !important;
 		height: 75px;
 		background-color: #313030;
 		background-size: 14px;
@@ -197,18 +198,16 @@ export default {
 		width: 460px;
 		img {
 			width: 100%;
+			height: 210px;
+			object-fit: cover;
 		}
 		p {
-			overflow: hidden;
-			display: -webkit-box;
-			-webkit-box-orient: vertical;
-			-webkit-line-clamp: 3;
-			word-break: break-all;
 			margin-top: 10px;
 			color: #ffffff;
 			font-size: 14px;
 			line-height: 1.3;
 			text-align: justify;
+			word-break: break-all;
 		}
 		h3 {
 			color: #ff5b5b;
@@ -274,32 +273,27 @@ export default {
 		background: rgba(0, 0, 0, .7);
 	}
 	.zone-mask-main {
+		position: relative;
 		width: 900px;
 		height: 500px;
-		background: url("../assets/dadabg.png") no-repeat;
-		text-align: center;
-		.pic1 {
-			margin-top: 30px;
-		}
-		.pic2 {
-			margin-top: 30px;
-		}
 		input {
+			position: absolute;
+			bottom: 170px;
+			left: 50%;
 			width: 300px;
 			height: 50px;
 			padding: 0 10px;
-			margin-top: 30px;
 			border: none;
 			outline: none;
 			font-size: 18px;
 			border-radius: 5px;
+			transform: translateX(-50%);
 		}
-		p {
-			margin: 30px 0 50px;
-			color: #fff;
-			font-size: 14px;
-			line-height: 1.3;
-			letter-spacing: 1px;
+		.btn {
+			position: absolute;
+			bottom: 20px;
+			left: 50%;
+			transform: translateX(-50%);
 		}
 	}
 </style>

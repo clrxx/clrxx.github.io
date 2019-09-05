@@ -2,12 +2,13 @@
 	<div class="dispute">
 		<div class="dispute-order white-radius">
 			<div class="account-title-small">
-				<h3>申请维权</h3>
+				<el-page-header @back="$router.back()" :content="headCont" />
 			</div>
 			<ul class="dispute-order-info">
-				<li><span>订单编号：</span>2019062514044160029351921200033</li>
-				<li><span>订单状态：</span>取消/维权（提交后变成维权）</li>
-				<li><span>下单时间：</span>2019年06月25号 14:04:41</li>
+				<li><span>订单编号：</span>{{ orderInfo.orderCode }}</li>
+				<li><span>订单状态：</span>{{ orderInfo.stateStr }}</li>
+				<li><span>商品金额：￥{{ orderInfo.goodPrice }}（不含押金）</span></li>
+				<li><span>下单时间：{{ orderInfo.createTime | formatDateTime }}</span></li>
 			</ul>
 		</div>
 		<div class="dispute-step white-radius">
@@ -20,24 +21,21 @@
 				<el-step title="维权结果"></el-step>
 			</el-steps>
 			<div class="dispute-step-cont">
-				<!-- <div class="step-1">
+				<div v-if="stepActive == 0" class="step-1">
 					<ul class="account-puc-list">
 						<li>
-							<label>充值金额：</label>
+							<label>维权金额：</label>
 							<el-input v-model="payMoney" size="small" placeholder="请输入金额" class="wh-200"></el-input>
 						</li>
 						<li>
-							<label>维权原因：</label><el-select v-model="causeValue" size="small" placeholder="请选择原因">
-								<el-option
-									v-for="item in causeOptions"
-									:key="item.value"
-									:label="item.label"
-									:value="item.value">
-								</el-option>
+							<label>维权原因：</label>
+							<el-select v-model="causeValue" @change="causeChange" size="small" placeholder="请选择原因">
+								<el-option v-for="item in causeOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
 							</el-select>
 						</li>
 						<li>
-							<label>联系方式：</label><el-input v-model="contact" size="small" placeholder="请输入联系方式"></el-input>
+							<label>联系方式：</label>
+							<el-input v-model="contact" size="small" placeholder="请输入联系方式"></el-input>
 						</li>
 						<li>
 							<label>维权内容：</label>
@@ -49,39 +47,48 @@
 							</el-input>
 						</li>
 						<li>
-							<label>附件：</label>
+							<label>图片：</label>
 							<el-upload
-								class="upload-demo"
-								action="https://jsonplaceholder.typicode.com/posts/"
 								multiple
-								:on-success="fileSuccess"
-								:on-error="fileError">
-								<el-button size="small" icon="el-icon-upload2">点击上传</el-button>
+								accept=".jpg,.jpeg,.png"
+								list-type="picture-card"
+								:action="upImgUrl"
+								:limit="10"
+								:before-upload="beforeUpload"
+								:on-success="uploadSuccess"
+								:on-exceed="uploadExceed"
+								:on-preview="uploadPictureCardPreview"
+								:on-remove="uploadRemove">
+								<i class="el-icon-plus"></i>
+								<div slot="tip" class="el-upload__tip">已上传图片<span class="color-success">{{ uploadImg.length }}</span>/10张，每张图片最大支持1M，仅支持jpg/jpeg/png格式</div>
 							</el-upload>
+							<el-dialog :visible.sync="dialogVisible">
+								<img width="100%" :src="dialogImageUrl" alt="pic">
+							</el-dialog>
 						</li>
 						<li><label></label>
-							<el-button type="primary" size="small">提交申请</el-button>
+							<el-button @click="putDispute" type="primary" size="small">提交申请</el-button>
 						</li>
 					</ul>
-				</div> -->
-				<div class="step-2-3">
+				</div>
+				<div v-if="stepActive == 2 || stepActive == 3" class="step-2">
 					<h3>维权记录</h3>
-					<ul class="cont">
-						<li>客服回复：（3的时候显示客服列表）</li>
-						<li>处理结果：成功</li>
-						<li>处理描述：卖家处理维权</li>
+					<ul v-if="stepActive == 3" class="cont">
+						<li>客服回复：xxxxxxxxxxx</li>
+						<li>处理结果：xxxxxxxxxxx</li>
+						<li>处理描述：xxxxxxxxxxx</li>
 					</ul>
 					<ul class="cont">
 						<li>于创建维权申请</li>
-						<li>维权原因：</li>
-						<li>申请退款金额：</li>
-						<li>申请说明：</li>
+						<li>维权原因：xxxxxxxxxxx</li>
+						<li>申请退款金额：￥{{ causeInfo.applyPrice }}</li>
+						<li>申请说明：xxxxxxxxxxx</li>
 					</ul>
-					<div class="mn">维权金额：<span>￥0</span></div>
+					<div class="mn">维权金额：<span>￥{{ causeInfo.applyPrice }}</span></div>
 					<ul class="dispute-order-info bd">
-						<li><span>创建时间：</span>2019年06月25号 14:04:41</li>
-						<li><span>订单状态：</span>提交/成功（3的时候显示成功）</li>
-						<li><span>退款金额：</span>状态显示成功才显示</li>
+						<li><span>创建时间：</span>{{ causeInfo.createTime | formatDateTime }}</li>
+						<li><span>订单状态：</span>{{ causeInfo.stateStr }}</li>
+						<li v-if="causeInfo.state == 2"><span>退款金额：</span>{{ causeInfo.refundPrce }}</li>
 					</ul>
 				</div>
 			</div>
@@ -90,47 +97,142 @@
 </template>
 
 <script>
+import { upImgUrl } from '@/common/api'
 export default {
 	data () {
 		return {
-			stepActive: 1,
-			payMoney: '',
+			upImgUrl,
+			headCont: '',
+			orderInfo: {},
+			stepActive: -1,
+			payMoney: 0,
 			causeValue: '',
-			causeTextarea: '',
+			causeIndex: 0,
 			contact: '',
-			causeOptions: [{
-				value: '其他问题',
-				label: '其他问题'
-			}, {
-				value: '账号信息与描述不符',
-				label: '账号信息与描述不符'
-			}, {
-				value: '账号被封',
-				label: '账号被封'
-			}, {
-				value: '密码错误导致无法登陆',
-				label: '密码错误导致无法登陆'
-			}, {
-				value: '账号在线或顶号导致无法正常游戏',
-				label: '账号在线或顶号导致无法正常游戏'
-			}, {
-				value: '异地或锁定导致无法登陆',
-				label: '异地或锁定导致无法登陆'
-			}, {
-				value: '虚贝百宝箱异常',
-				label: '虚贝百宝箱异常'
-			}, {
-				value: '开外挂',
-				label: '开外挂'
-			}]
+			causeTextarea: '',
+			causeOptions: [
+				{
+					id: 1,
+					name: '其他问题'
+				}, {
+					id: 2,
+					name: '账号信息与描述不符'
+				}, {
+					id: 4,
+					name: '账号被封'
+				}, {
+					id: 7,
+					name: '密码错误导致无法登陆'
+				}, {
+					id: 8,
+					name: '账号在线或顶号导致无法正常游戏'
+				}, {
+					id: 10,
+					name: '异地或锁定导致无法登陆'
+				}, {
+					id: 27,
+					name: '开外挂'
+				}
+			],
+			uploadImg: [],
+        	dialogVisible: false,
+			dialogImageUrl: '',
+
+			causeInfo: {}
 		}
 	},
+	created () {
+		this.cAjax();
+	},
 	methods: {
-		fileSuccess (res, file) {
-			console.log(file);
+		cAjax () {
+			this.$api.post('OrderDetails', this.$route.query.orderCode)
+				.then(res => {
+					this.orderInfo = res.obj;
+					this.payMoney = res.obj.goodPrice;
+					if (this.orderInfo.state == 5) {
+						this.stepActive = 2;
+						this.headCont = '维权仲裁';
+						this.mAjax();
+					} else if (this.orderInfo.state == 6) {
+						this.stepActive = 3;
+						this.headCont = '维权结束';
+						this.mAjax();
+					} else {
+						this.stepActive = 0;
+						this.headCont = '申请维权';
+					}
+				})
 		},
-		fileError (err, file) {
-			console.log(file);
+		mAjax () {
+			this.$api.post('OrderRightInfo', this.$route.query.orderCode)
+				.then(res => {
+					this.causeInfo = res.obj;
+				})
+		},
+		causeChange (e) {
+			this.causeIndex = e;
+		},
+		putDispute () {
+			this.$notify.closeAll();
+			let moReg = /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^[0-9]\.[0-9]([0-9])?$)/;
+			if (!this.payMoney) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请输入维权金额'
+				});
+			} else if (!moReg.test(this.payMoney)) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请正确输入维权金额'
+				});
+			} else if (!this.causeValue) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请选择维权原因'
+				});
+			} else {
+				this.$api.post('CerateOrderRight', {
+					orderCode: this.orderInfo.orderCode,
+					applyPrice: this.payMoney,
+					reason: this.causeIndex,
+					contect: this.contact,
+					summary: this.causeTextarea,
+					imageUrl: this.uploadImg
+				}).then(res => {
+					this.$notify({
+						title: '温馨提示',
+						message: '维权申请成功'
+					});
+					this.cAjax();
+				}) 
+			}
+		},
+		beforeUpload (file) {
+			if (file.size > 1024*1024) {
+				this.$notify({
+					title: '温馨提示',
+					message: '单张图片最大仅限1M'
+				});
+				return false;
+			}
+		},
+		uploadSuccess (res, file, fileList) {
+			this.uploadImg.push(file.url);
+		},
+		uploadExceed () {
+			this.$notify({
+				title: '温馨提示',
+				message: '最大只能上传10张图片'
+			});
+		},
+		uploadRemove (file, fileList) {
+			let _index = this.uploadImg.indexOf(file.url);
+			if (_index > -1) this.uploadImg.splice(_index, 1);
+		},
+		uploadPictureCardPreview (file) {
+			this.dialogImageUrl = file.url;
+			this.dialogVisible = true;
 		}
 	}
 }
@@ -169,7 +271,7 @@ export default {
 			width: 200px;
 		}
 	}
-	.step-2-3 {
+	.step-2 {
 		h3 {
 			font-weight: bold;
 		}

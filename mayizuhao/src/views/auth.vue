@@ -1,5 +1,11 @@
 <template>
 	<div class="login">
+		<div class="login-index">
+			<div class="cont">
+				<h2 @click="toIndexPage"><img src="@/assets/house.png" alt="house">您好，欢迎来到蚂蚁租号！</h2>
+				<a href="http://wpa.qq.com/msgrd?v=3&uin=2502851992&site=qq&menu=yes" target="_blank">联系客服</a>
+			</div>
+		</div>
 		<div class="login-main wh-1300">
 			<ul class="login-utils">
 				<li>
@@ -18,17 +24,18 @@
 					<h2>注册</h2>
 					<ul class="user-options">
 						<li>
-							<input type="text" placeholder="手机号">
+							<input v-model="phone" type="text" maxlength="11" placeholder="手机号">
 						</li>
 						<li class="sms">
-							<input type="text" placeholder="手机验证码">
-							<button class="btn1">发送验证码</button>
+							<input v-model="smsCode" type="text" placeholder="手机验证码">
+							<button v-if="isSms" @click="sendSms" class="btn1">发送验证码</button>
+							<button v-if="!isSms" class="btn1">{{ smsTimer }}s后重新发送</button>
 						</li>
 						<li class="mb">
-							<input type="password" placeholder="你的密码">
+							<input v-model="pass" type="password" placeholder="密码">
 						</li>
 						<li class="reg">
-							<button class="btn2">注册</button>
+							<button @click="signRetrieve('sign')" class="btn2">注册</button>
 						</li>
 					</ul>
 				</div>
@@ -36,17 +43,17 @@
 					<h2>登录</h2>
 					<ul class="user-options">
 						<li>
-							<input type="text" placeholder="手机号">
+							<input v-model="phone" type="text" maxlength="11" placeholder="手机号">
 						</li>
 						<li>
-							<input type="password" placeholder="你的密码">
+							<input v-model="pass" type="password" placeholder="密码">
 						</li>
 						<li class="mb">
 							<YunPian @YPChange="YPChange" />
 						</li>
 						<li class="in">
 							<a @click="switchMode(2)">忘记密码</a>
-							<button class="btn2">登录</button>
+							<button @click="login" class="btn2">登录</button>
 						</li>
 					</ul>
 				</div>
@@ -54,17 +61,18 @@
 					<h2>找回密码</h2>
 					<ul class="user-options">
 						<li>
-							<input type="text" placeholder="手机号">
+							<input v-model="phone" type="text" maxlength="11" placeholder="手机号">
 						</li>
 						<li>
-							<input type="text" placeholder="手机验证码">
+							<input v-model="smsCode" type="text" placeholder="手机验证码">
 						</li>
 						<li class="mb">
-							<input type="password" placeholder="你的密码">
+							<input v-model="pass" type="password" placeholder="密码">
 						</li>
 						<li class="in">
-							<button class="btn1">发送验证码</button>
-							<button class="btn2">确定</button>
+							<button v-if="isSms" @click="sendSms" class="btn1">发送验证码</button>
+							<button v-if="!isSms" class="btn1">{{ smsTimer }}s后重新发送</button>
+							<button @click="signRetrieve('retrieve')" class="btn2">确定</button>
 							<button @click="switchMode(1)" class="btn3">返回</button>
 						</li>
 					</ul>
@@ -76,6 +84,7 @@
 
 <script>
 import YunPian from '@/components/yunpian/yunpian';
+let phoneReg = /^[1][2,3,4,5,6,7,8,9][0-9]{9}$/;
 export default {
 	components: {
 		YunPian
@@ -84,6 +93,11 @@ export default {
 		return {
 			showModeNum: 1, // 0代表注册 1代表登录 2代表找回密码
 			bounceDirection: 'bounceRight',
+			smsTimer: 60,
+			isSms: true,
+			phone: '',
+			pass: '',
+			smsCode: '',
 			YPtoken: '',
 			YPauthenticate: ''
 		}
@@ -92,13 +106,16 @@ export default {
 		if (this.$route.query.sign == 1) {
 			this.showModeNum = 0;
 			this.bounceDirection = 'bounceLeft';
-		} else {
-			this.showModeNum = 1;
-			this.bounceDirection = 'bounceRight';
 		}
 	},
 	methods: {
+		toIndexPage () {
+			this.$router.push('/');
+		},
 		switchMode (i) {
+			this.phone = '';
+			this.pass = '',
+			this.smsCode = '';
 			this.showModeNum = i;
 			if (this.showModeNum == 1 || this.showModeNum == 2) {
 				this.bounceDirection = 'bounceRight';
@@ -111,21 +128,179 @@ export default {
 			this.YPauthenticate = e.authenticate;
 		},
 		login () {
-
+			if (!this.phone) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请输入手机号',
+				});
+			} else if(!phoneReg.test(this.phone)) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请正确输入手机号',
+				});
+			} else if (!this.pass) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请输入密码',
+				});
+			} else if (!this.YPtoken) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请完成验证码',
+				});
+			} else {
+				this.$api.post('Login', {
+					tel: this.phone,
+					pwd: this.pass,
+					token: this.YPtoken,
+					authenticate: this.YPauthenticate
+				}).then(res => {
+					let _data = res.obj;
+					localStorage.setItem('MYtoken', _data.token);
+					localStorage.setItem('MYuserInfo', JSON.stringify({
+						userName: _data.userBase.name,
+						userPic: _data.userBase.headImage
+					}));
+					localStorage.setItem('MYloginTimestamp', new Date().getTime());
+					let _href = location.href;
+					location.href = _href.slice(0, _href.indexOf('/auth'));
+				});
+			}
+		},
+		sendSms () {
+			if (!this.phone) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请输入手机号',
+				});
+			} else if(!phoneReg.test(this.phone)) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请正确输入手机号',
+				});
+			} else {
+				this.$api.post('SendTelCode', this.phone)
+					.then(res => {
+						this.$notify({
+							title: '温馨提示',
+							message: '验证码已发送，请注意查收。',
+						});
+						this.isSms = false;
+						let timer = setInterval(() => {
+							this.smsTimer --;
+							if (this.smsTimer == 0) {
+								clearInterval(timer);
+								this.isSms = true;
+								this.smsTimer = 60;
+							}
+						}, 1000);
+					});
+			}
+		},
+		signRetrieve (utl) {
+			if (!this.phone) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请输入手机号',
+				});
+			} else if(!phoneReg.test(this.phone)) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请正确输入手机号',
+				});
+			} else if (!this.smsCode) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请输入验证码',
+				});
+			} else if (!this.pass) {
+				this.$notify({
+					title: '温馨提示',
+					message: '请输入密码',
+				});
+			} else {
+				if (utl == 'sign') {
+					// 注册
+					this.$api.post('AddUser', {
+						tel: this.phone,
+						pwd: this.pass,
+						code: this.smsCode
+					}).then(res => {
+						this.$notify({
+							title: '温馨提示',
+							message: '恭喜您，注册成功。',
+						});
+						this.showModeNum = 1;
+						this.bounceDirection = 'bounceRight';
+					});
+				} else if (utl == 'retrieve') {
+					// 修改登录密码
+					this.$api.post('UpPwd', {
+						updateType: 1,
+						tel: this.phone,
+						pwd: this.smsCode,
+						newPwd: this.pass
+					}).then(res => {
+						this.$notify({
+							title: '温馨提示',
+							message: '密码修改成功',
+						});
+						this.showModeNum = 1;
+						this.bounceDirection = 'bounceRight';
+					});
+				}
+			}
 		}
 	}
 }
 </script>
 
 <style lang="scss" scoped>
+	.login-index {
+		position: fixed;
+		z-index: 5;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 45px;
+		background: #292929;
+		.cont {
+			display: flex;
+			align-items: center;
+			max-width: 1300px;
+			margin: 0 auto;
+			height: 100%;
+			h2 {
+				display: flex;
+				align-items: center;
+				margin-right: 10px;
+				color: #ccc;
+				cursor: pointer;
+				img {
+					margin-right: 5px;
+				}
+			}
+			a {
+				padding: 0 12px;
+				background: #78c443;
+				color: #fff;
+				line-height: 22px;
+				text-align: center;
+				border-radius: 20px;
+				cursor: pointer;
+			}
+		}
+	}
 	.login {
-		height: calc(100vh - 45px);
-		background: url("https://img.myzuhao.top/%E8%83%8C%E6%99%AF%E5%9B%BE.jpg") no-repeat center/cover;
 		display: flex;
 		align-items: center;
-		.login-main {
-			position: relative;
-		}
+		overflow: hidden;
+		width: 100%;
+		height: 100vh;
+		background: url("https://img.myzuhao.top/%E8%83%8C%E6%99%AF%E5%9B%BE.jpg") no-repeat center/cover;
+	}
+	.login-main {
+		position: relative;
 	}
 	.login-utils {
 		display: flex;
@@ -288,24 +463,24 @@ export default {
 	}
 	@keyframes bounceLeft {
 		0% {
-			transform: translate3d(calc(100% - 30px), 0, 0);
+			transform: translateX(calc(100% - 30px));
 		}
 		50% {
-			transform: translate3d(0, 0, 0);
+			transform: translateX(0);
 		}
 		100% {
-			transform: translate3d(30px, 0, 0);
+			transform: translateX(30px);
 		}
 	}
 	@keyframes bounceRight {
 		0% {
-			transform: translate3d(30px, 0, 0);
+			transform: translateX(30px);
 		}
 		50% {
-			transform: translate3d(100%, 0, 0);
+			transform: translateX(100%);
 		}
 		100% {
-			transform: translate3d(calc(100% - 30px), 0, 0);
+			transform: translateX(calc(100% - 30px));
 		}
 	}
 	@keyframes showSign {

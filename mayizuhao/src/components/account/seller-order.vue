@@ -1,5 +1,5 @@
 <template>
-	<div class="seller-account">
+	<div class="buyer-order">
 		<div class="account-puc">
 			<el-page-header class="back-none" content="我出租的帐号" />
 			<div class="account-puc-cont">
@@ -17,9 +17,8 @@
 					</li>
 				</ul>
 			</div>
-			<!-- ["创建", "取消", "支付完成", "结束", "维权中", "维权结束"] -->
-			<el-tabs v-model="tabsActive">
-				<el-tab-pane v-for="item in tabsArr" :key="item.name" :label="item.label" :name="item.name">
+			<el-tabs v-model="tabsActive" @tab-click="tabsClick">
+				<el-tab-pane v-for="item in tabsArr" :key="item" :label="item" :name="item">
 					<div class="lease-order-info">
 						<ul class="lease-order-thead">
 							<li class="item1">商品详情</li>
@@ -29,35 +28,39 @@
 							<li class="item5">订单状态</li>
 							<li class="item6">订单操作</li>
 						</ul>
+						<null-data v-if="tableData.length == 0" />
 						<ul class="lease-order-list">
-							<li v-for="i in 2" :key="i">
+							<li v-for="item in tableData" :key="item.code">
 								<div class="order-title">
-									<div class="title"><span>订单号：</span>54645451545<span class="s1">创建时间：</span>2019-01-01</div>
-									<div class="time"><span>租赁时间：</span>2019-01-01 00:00:00<span>至</span>2019-01-01 00:00:00</div>
+									<div class="title"><span>订单号：</span>{{ item.code }}<span class="s1">创建时间：</span>{{ item.createTime | formatDateTime }}</div>
+									<div v-if="item.orderState != 2" class="time"><span>租赁时间：</span>{{ item.startTime | formatDateTime }}<span>至</span>{{ item.endTime | formatDateTime }}</div>
 								</div>
 								<div class="order-cont">
 									<div class="cont item1">
-										<div class="pic" style="background-image: url('http://files.xubei.com/demon/bcc1ff6b89ff4d8c86a7606d23bd87ea.jpg')"></div>
+										<div class="pic" :style="{'background-image': 'url('+ item.imageUrl +')'}"></div>
 										<div class="te">
-											<h4>PO7★5阶鲲套★赐福剪影-世代之影★龙皇泰坦★电光原子灭世者★天神狼王鹰王套★蝎王★星云战车动天使★初霜战斗神翼★初霜摸金符三阶★塔防猎场爆破僵尸齐全★全模式任意体验★</h4>
-											<span>绝地求生</span>
+											<h4>{{ item.goodTitle? item.goodTitle.slice(0, 30):'' }}</h4>
+											<p>{{ item.goodPath? item.goodPath.slice(0, 30):'' }}</p>
 										</div>
 									</div>
-									<div class="price item2">1.00元/小时</div>
-									<div class="dur item3">2小时</div>
+									<div class="price item2">{{ item.price }}元/小时</div>
+									<div class="dur item3">{{ item.count }}小时</div>
 									<div class="amount item4">
-										<p>￥3.00</p>
-										<span>(押金：￥0.00)</span>
+										<p>￥{{ item.payPrice }}</p>
+										<span>(押金：￥{{ item.deposit }})</span>
 									</div>
-									<div class="status item5">{{ item.label }}</div>
+									<div class="status item5">{{ orderStateStr[item.orderState] }}</div>
 									<div class="opts item6">
-										<el-button size="small" @click="toOrderDetail">订单详情</el-button>
-										<el-link type="primary" @click="toDispute">申请维权（申请后就变成查看维权）</el-link>
+										<el-button size="small" @click="toOrderDetail(item.code)">订单详情</el-button>
+										<el-link v-if="item.orderState == 3" type="primary" @click="toDispute(item.code)">申请维权</el-link>
+										<el-link v-if="item.orderState == 5 || item.orderState == 6" type="primary" @click="toDispute(item.code)">查看维权</el-link>
 									</div>
 								</div>
 							</li>
 						</ul>
-						<el-pagination :total="20" :page-size="10" :current-page="1" @current-change="pageChange" background layout="prev, pager, next" />
+						<div v-if="tableData.length > 0" class="pagination">
+							<el-pagination :total="pageTotal" :page-size="pageSize" :current-page="pageCurrent" @current-change="pageChange" background layout="prev, pager, next" />
+						</div>
 					</div>
 				</el-tab-pane>
 			</el-tabs>
@@ -69,41 +72,94 @@
 export default {
 	data () {
 		return {
+			tableData: [],
+			datePicker: null,
+			orderStateNum: 0,
+			orderStateStr: ['无', '订单创建', '订单取消', '支付完成', '交易完成', '维权中', '维权结束'],
 			tabsActive: '全部订单',
-			tabsArr: [{
-				name: '全部订单',
-				label: '全部订单'
-			}, {
-				name: '租赁中',
-				label: '租赁中'
-			}, {
-				name: '维权订单',
-				label: '维权订单'
-			}, {
-				name: '已完成订单',
-				label: '已完成订单'
-			}],
+			tabsArr: ['全部订单', '租赁中', '维权中', '维权结束', '已完成订单'],
 
-			pageTotal: 20,
+			pageTotal: 10,
 			pageSize: 10,
-			pageCurrent: 1,
-
-			datePicker: ''
+			pageCurrent: 1
 		}
 	},
+	created () {
+		this.cAjax();
+	},
 	methods: {
+		cAjax () {
+			let _params = {
+				orderState: this.orderStateNum,
+				itemCount: this.pageSize,
+				pageIndex: (this.pageCurrent - 1),
+				createTimeOrder: {
+					flag: true,
+					desc: true,
+					index: 0
+				}
+			};
+			if (this.datePicker) {
+				_params = Object.assign({
+					createTime: {
+						startTime: this.datePicker[0],
+						startTimeStr: this.datePicker[0],
+						endTime: this.datePicker[1],
+						endTimeStr: this.datePicker[1]
+					}
+				}, _params);
+			}
+			this.$api.post('SellGoodOrderPage', _params)
+				.then(res => {
+					console.log(res)
+					// this.tableData = res.obj.obj;
+					// this.pageTotal = res.obj.allItemCount;
+				})
+		},
 		datePickerChange (e) {
-			console.log(this.$formatDateTime(e[0]))
-			console.log(this.$formatDateTime(e[1]))
+			if (e) {
+				let _arr = [];
+				e.forEach(el => {
+					_arr.push(this.$moment(el).format('YYYY-MM-DD HH:mm:ss'));
+				});
+				this.datePicker = _arr;
+			}
+			this.pageCurrent = 1;
+			this.cAjax();
 		},
-		toOrderDetail () {
-			this.$router.push('/account/order-detail');
-		},
-		toDispute () {
-			this.$router.push('/account/dispute');
+		tabsClick (e) {
+			let _index = parseInt(e.index);
+			switch (_index) {
+				case 0:
+					this.orderStateNum = 0;
+					break;
+				case 1:
+					this.orderStateNum = 3;
+					break;
+				case 2:
+					this.orderStateNum = 5;
+					break;
+				case 3:
+					this.orderStateNum = 6;
+					break;
+				case 4:
+					this.orderStateNum = 4;
+					break;
+				default:
+					break;
+			}
+			this.pageCurrent = 1;
+			this.cAjax();
 		},
 		pageChange (e) {
-			console.log(e)
+			this.pageCurrent = e;
+			this.cAjax();
+		},
+		toOrderDetail (code) {
+			this.$router.push({path: '/account/order-detail', query: {orderCode: code}});
+		},
+		toDispute (code) {
+			this.$router.push({path: '/account/dispute', query: {orderCode: code}});
 		}
 	}
 }

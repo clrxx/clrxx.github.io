@@ -3,21 +3,22 @@
 		<div class="account-puc">
 			<div class="change-pass-main">
 				<div class="radio">
-					<el-radio v-model="radioActive" :label="1" @change="radioChange">原始密码</el-radio>
-					<el-radio v-model="radioActive" :label="2" @change="radioChange">短信验证</el-radio>
+					<el-radio v-model="radioActive" :label="1">原始密码</el-radio>
+					<el-radio v-model="radioActive" :label="2">短信验证</el-radio>
 				</div>
 				<el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="form-label-12">
-					<el-form-item v-if="radioActive == 2" label="手机号" prop="pn" class="row-item pn">
-						<el-input v-model.number="ruleForm.pn" size="small" maxlength="11" placeholder="请输入手机号"></el-input>
+					<el-form-item v-if="radioActive == 2" label="手机号" prop="phone" class="row-item phone">
+						<el-input v-model.number="ruleForm.phone" size="small" maxlength="11" placeholder="请输入手机号"></el-input>
 					</el-form-item>
 					<el-form-item v-if="radioActive == 2" prop="sms" class="row-item sms">
 						<el-input v-model="ruleForm.sms" size="small" placeholder="验证码"></el-input>
-						<el-button size="small" class="send-sms">发送验证码</el-button>
+						<el-button v-if="isSms" @click="sendSms" size="small" class="send-sms">发送验证码</el-button>
+						<el-button v-if="!isSms" size="small" class="send-sms">{{ smsTimer }}s后重新发送</el-button>
 					</el-form-item>
-					<el-form-item v-if="radioActive == 1" label="原密码" prop="opass">
+					<el-form-item v-if="radioActive == 1" label="登录密码" prop="opass">
 						<el-input type="password" v-model="ruleForm.opass" size="small"></el-input>
 					</el-form-item>
-					<el-form-item label="新密码" prop="pass">
+					<el-form-item label="新登录密码" prop="pass">
 						<el-input type="password" v-model="ruleForm.pass" size="small"></el-input>
 					</el-form-item>
 					<el-form-item label="确认新密码" prop="checkPass">
@@ -65,17 +66,19 @@ export default {
 			}
 		};
 		return {
+			isSms: true,
+			smsTimer: 60,
 			radioActive: 1,
 			ruleForm: {
 				opass: '',
 				pass: '',
 				checkPass: '',
-				pn: '',
+				phone: '',
 				sms: ''
 			},
 			rules: {
 				opass: [
-					{ required: true, message: '请输入原密码', trigger: 'blur' }
+					{ required: true, message: '请输入登录密码', trigger: 'blur' }
 				],
 				pass: [
 					{ required: true, validator: validatePass, trigger: 'blur' }
@@ -83,7 +86,7 @@ export default {
 				checkPass: [
 					{ required: true, validator: validatePass2, trigger: 'blur' }
 				],
-				pn: [
+				phone: [
 					{ required: true, validator: validatePn, trigger: 'blur' },
 					{ type: 'number', message: '手机号码须为数字' }
 				],
@@ -92,17 +95,56 @@ export default {
 				]
 			}
 		}
-    },
+	},
+	created () {
+		this.$api.post('BaseInfo')
+			.then(res => {
+				this.ruleForm.phone = parseInt(res.obj.tel);
+			});
+	},
     methods: {
 		submitForm(formName) {
 			this.$refs[formName].validate((valid) => {
 				if (valid) {
-					console.log(this.ruleForm);
-				} else {
-					console.log('error submit.');
-					return false;
+					let data = {
+						updateType: 0,
+						pwd: this.ruleForm.opass,
+						newPwd: this.ruleForm.pass,
+						tel: this.ruleForm.phone
+					}
+					if (this.radioActive == 2) {
+						data.updateType = 1;
+						data.pwd = this.ruleForm.sms;
+					}
+					this.$api.post('UpPwd', data)
+						.then(res => {
+							this.$notify({
+								title: '温馨提示',
+								message: '密码修改成功',
+							});
+							this.radioActive = 1;
+							this.radioChange();
+						});
 				}
 			});
+		},
+		sendSms () {
+			this.$api.post('SendTelCode', this.ruleForm.phone)
+				.then(res => {
+					this.$notify({
+						title: '温馨提示',
+						message: '验证码已发送，请注意查收。',
+					});
+					this.isSms = false;
+					let timer = setInterval(() => {
+						this.smsTimer --;
+						if (this.smsTimer == 0) {
+							clearInterval(timer);
+							this.isSms = true;
+							this.smsTimer = 60;
+						}
+					}, 1000);
+				});
 		},
 		radioChange () {
 			this.$refs['ruleForm'].resetFields();
@@ -112,26 +154,5 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-	.change-pass-main {
-		width: 500px;
-		.radio {
-			padding-bottom: 20px;
-		}
-		.row-item {
-			display: inline-block;
-		}
-		.pn {
-			.el-input {
-				width: 165px;
-			}
-		}
-		.sms {
-			.el-input {
-				width: 100px;
-			}
-		}
-		.send-sms {
-			margin: 1px 0 0 20px;
-		}
-	}
+
 </style>
