@@ -86,6 +86,14 @@ export default new Router({
 					component: () => import('./views/release')
 				},
 				{
+					path: '/release-change',
+					name: 'release-change',
+					meta: {
+						isShowLogo: 1
+					},
+					component: () => import('./views/release-change')
+				},
+				{
 					path: '/notice',
 					component: () => import('./views/notice'),
 					children: [
@@ -198,14 +206,6 @@ export default new Router({
 								isShowLogo: 1
 							},
 							component: () => import('./components/account/seller-account-manage'),
-						},
-						{
-							path: '/account/seller-account-edit',
-							name: 'account/seller-account-edit',
-							meta: {
-								isShowLogo: 1
-							},
-							component: () => import('./components/account/seller-account-edit'),
 						},
 						{
 							path: '/account/bills',

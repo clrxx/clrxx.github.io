@@ -15,7 +15,11 @@
 					<ul class="sel-list game">
 						<li v-for="item in pcGoodsLen" :key="item.name" @click="selGames(item, 0)">
 							<el-tooltip class="item" effect="dark" :content="item.name" placement="top">
-								<img :src="item.imageUrl" :alt="item.name">
+								<el-image fit="cover" :src="item.imageUrl">
+									<div slot="placeholder" class="image-slot">
+										<i class="el-icon-picture-outline"></i>
+									</div>
+								</el-image>
 							</el-tooltip>
 						</li>
 					</ul>
@@ -25,13 +29,17 @@
 					<ul class="sel-list game">
 						<li v-for="item in moGoodsLen" :key="item.name" @click="selGames(item, 0)">
 							<el-tooltip class="item" effect="dark" :content="item.name" placement="top">
-								<img :src="item.imageUrl" :alt="item.name">
+								<el-image fit="cover" :src="item.imageUrl">
+									<div slot="placeholder" class="image-slot">
+										<i class="el-icon-picture-outline"></i>
+									</div>
+								</el-image>
 							</el-tooltip>
 						</li>
 					</ul>
 				</div>
 				<div class="sel-cont">
-					<h4>游戏类型</h4>
+					<h4 class="sl">游戏类型</h4>
 					<ul class="sel-list">
 						<li>
 							<el-popover width="800" placement="bottom-start" v-model="popVisible">
@@ -41,7 +49,7 @@
 										<li><el-radio @change="selGameCls('游戏_手游')" v-model="radioFro" label="2" border size="small">手游</el-radio></li>
 									</ul>
 									<ul class="clist">
-										<li v-for="item in gameGoods" :key="item.name" @click="selGames(item)">{{ item.name }}</li>
+										<li v-for="item in gameSGoods" :key="item.name" @click="selGames(item)">{{ item.name }}</li>
 									</ul>
 								</div>
 								<el-button size="medium" slot="reference">{{ goodsName }} <i class="el-icon-edit"></i></el-button>
@@ -53,7 +61,7 @@
 							</el-select>
 						</li>
 						<li v-if="gameEGoods.length > 0">
-							<el-select v-model="gameEGoodsPath" size="medium" placeholder="请选择">
+							<el-select v-model="gameEGoodsPath" @change="selGameE" size="medium" placeholder="请选择">
 								<el-option v-for="item in gameEGoods" :key="item.name" :label="item.name" :value="item.path" />
 							</el-select>
 						</li>
@@ -61,7 +69,7 @@
 					</ul>
 				</div>
 				<div class="sel-cont">
-					<h4>高级选项</h4>
+					<h4 class="sl">高级选项</h4>
 					<ul class="sel-list sort">
 						<li v-for="item in advancedOptions" :key="item.name">
 							<el-popover placement="bottom">
@@ -87,7 +95,13 @@
 				<ul>
 					<li v-for="item in goods" :key="item.code">
 						<div class="ac">
-							<img class="pic" :src="item.imageUrl" alt="pic">
+							<div class="ae">
+								<el-image fit="cover" :src="item.imageUrl" class="pic">
+									<div slot="placeholder" class="image-slot">
+										<i class="el-icon-picture-outline"></i>
+									</div>
+								</el-image>
+							</div>
 							<div class="recom">
 								<h3>{{ item.name }}</h3>
 								<h4>{{ item.typeName }}</h4>
@@ -115,7 +129,6 @@
 </template>
 
 <script>
-import { setTimeout } from 'timers';
 export default {
 	data () {
 		return {
@@ -123,14 +136,15 @@ export default {
 			moGoods: [],
 
 			popVisible: false,
-			goodsName: '选择游戏',
 			radioFro: '1',
-			gameGoods: [],
-			gameGoodsPath: '',
+			goodsName: '选择游戏',
+			gameSGoods: [],
+			gameSGoodsPath: '',
 			gameYGoods: [],
 			gameYGoodsPath: '',
 			gameEGoods: [],
 			gameEGoodsPath: '',
+			gameAllGoodsPath: '',
 
 			advancedOptions: [],
 			fixedTagsObj: {},
@@ -149,28 +163,28 @@ export default {
 	},
 	created () {
 		// 处理页面传值过来对应各选项 start
-		let _$query = this.$route.query.goodsId;
-		let _$list = [];
-		let _$num = _$query.indexOf('_');
-		let _$vlist = _$query.split('_');
-		while (_$num > -1) {
-			_$list.push(_$num);
-			_$num = _$query.indexOf('_', _$num + 1);
+		let _query = this.$route.query.goodsId;
+		let _list = [];
+		let _num = _query.indexOf('_');
+		let _vlist = _query.split('_');
+		while (_num > -1) {
+			_list.push(_num);
+			_num = _query.indexOf('_', _num + 1);
 		}
-		let _$listLen = _$list.length;
-		if (_$listLen >= 2) {
+		let _listLen = _list.length;
+		if (_listLen >= 2) {
 			this.selGames({
-				name: _$vlist[2],
-				path: _$query.slice(0, _$list[2]),
+				name: _vlist[2],
+				path: _query.slice(0, _list[2]),
 			});
-			this.gameGoodsPath = _$query.slice(0, _$list[2]);
+			this.gameSGoodsPath = _query.slice(0, _list[2]);
 		}
-		if (_$listLen >= 3) {
-			this.selGameY(_$query.slice(0, _$list[3]));
-			this.gameYGoodsPath = _$query.slice(0, _$list[3]);
+		if (_listLen >= 3) {
+			this.selGameY(_query.slice(0, _list[3]));
+			this.gameYGoodsPath = _query.slice(0, _list[3]);
 		}
-		if (_$listLen >= 4) {
-			this.gameEGoodsPath = _$query;
+		if (_listLen >= 4) {
+			this.gameEGoodsPath = _query;
 		}
 		// end
 		this.$api.post('GetChildrenType', JSON.stringify('游戏_端游'))
@@ -198,12 +212,13 @@ export default {
 		selGameCls (path) {
 			this.$api.post('GetChildrenType', JSON.stringify(path))
 				.then(res => {
-					this.gameGoods = res.obj;
+					this.gameSGoods = res.obj;
 				})
 		},
 		selGames (item, index) {
 			this.goodsName = item.name;
-			this.gameGoodsPath = item.path;
+			this.gameSGoodsPath = item.path;
+			this.gameAllGoodsPath = item.path;
 			this.recode();
 			this.$api.post('GetChildrenType', JSON.stringify(item.path))
 				.then(res => {
@@ -212,23 +227,18 @@ export default {
 			if (index == 0) this.gameSearch();
 		},
 		selGameY (path) {
+			this.gameAllGoodsPath = path;
 			this.$api.post('GetChildrenType', JSON.stringify(path))
 				.then(res => {
 					this.gameEGoods = res.obj;
 				})
 		},
+		selGameE (path) {
+			this.gameAllGoodsPath = path;
+		},
 		// 点击搜索商品
 		gameSearch () {
-			let currentPath = this.$route.path;
-			if (!this.gameEGoodsPath) {
-				if (!this.gameYGoodsPath) {
-					this.$router.replace({path: currentPath, query: {goodsId: this.gameGoodsPath}});
-				} else {
-					this.$router.replace({path: currentPath, query: {goodsId: this.gameYGoodsPath}});
-				}
-			} else {
-				this.$router.replace({path: currentPath, query: {goodsId: this.gameEGoodsPath}});
-			}
+			this.$router.replace({path: this.$route.path, query: {goodsId: this.gameAllGoodsPath}});
 			this.pageCurrent = 1;
 			this.advancedOptions = [];
 			this.getSupportScopeTags();
@@ -362,7 +372,7 @@ export default {
 		},
 		// 清空筛选
 		refresh () {
-			location.reload();
+			window.location.reload();
 		},
 		toLease (id, res) {
 			this.$router.push({path: '/lease', query: {leaseId: id, resId: res}});
@@ -413,13 +423,16 @@ export default {
 			h4 {
 				flex-shrink: 0;
 				width: 100px;
+				line-height: 80px;
+				border-right: 1px solid #eee;
+			}
+			.sl {
+				line-height: 60px;
 			}
 		}
 		.sel-list {
 			display: flex;
 			flex-wrap: wrap;
-			padding: 10px 0;
-			border-left: 1px solid #eee;
 			li {
 				position: relative;
 				padding: 0 15px;
@@ -431,11 +444,6 @@ export default {
 				li {
 					width: 130px;
 					height: 60px;
-				}
-				img {
-					width: 100%;
-					height: 100%;
-					object-fit: cover;
 				}
 			}
 		}
@@ -521,7 +529,6 @@ export default {
 			height: 80px;
 			margin-right: 20px;
 			border-radius: 5px;
-			object-fit: cover;
 		}
 		.recom {
 			width: 600px;

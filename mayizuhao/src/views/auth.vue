@@ -49,7 +49,7 @@
 							<input v-model="pass" type="password" placeholder="密码">
 						</li>
 						<li class="mb">
-							<YunPian @YPChange="YPChange" />
+							<YunPian @YPChange="YPChange" ref="YPretry" />
 						</li>
 						<li class="in">
 							<a @click="switchMode(2)">忘记密码</a>
@@ -149,21 +149,30 @@ export default {
 					message: '请完成验证码',
 				});
 			} else {
-				this.$api.post('Login', {
+				this.$api.postBack('Login', {
 					tel: this.phone,
 					pwd: this.pass,
 					token: this.YPtoken,
 					authenticate: this.YPauthenticate
 				}).then(res => {
-					let _data = res.obj;
-					localStorage.setItem('MYtoken', _data.token);
-					localStorage.setItem('MYuserInfo', JSON.stringify({
-						userName: _data.userBase.name,
-						userPic: _data.userBase.headImage
-					}));
-					localStorage.setItem('MYloginTimestamp', new Date().getTime());
-					let _href = location.href;
-					location.href = _href.slice(0, _href.indexOf('/auth'));
+					if (res.flag) {
+						let _data = res.obj;
+						localStorage.setItem('MYtoken', _data.token);
+						localStorage.setItem('MYuserInfo', JSON.stringify({
+							userName: _data.userBase.name,
+							userPic: _data.userBase.headImage
+						}));
+						localStorage.setItem('MYloginTimestamp', new Date().getTime());
+						let MYhref = sessionStorage.getItem('MYhref');
+						if (MYhref == null || MYhref == '') {
+							let _href = window.location.href;
+							window.location.href = _href.slice(0, _href.indexOf('/auth'));
+						} else {
+							window.location.href = sessionStorage.getItem('MYhref');
+						}
+					} else {
+						this.$refs.YPretry.YPriddler();
+					}
 				});
 			}
 		},

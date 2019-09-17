@@ -9,7 +9,11 @@
 				<ul class="zone-games-list">
 					<li v-for="item in zoneInfo" :key="item.id">
 						<router-link :to="{path: '/zone-detail', query: {zoneId: item.id}}">
-							<img :src="item.imageUrl" :alt="item.name">
+							<el-image fit="cover" :src="item.imageUrl" class="pic">
+								<div slot="placeholder" class="image-slot">
+									<i class="el-icon-picture-outline"></i>
+								</div>
+							</el-image>
 							<span>{{ item.name }}<em></em></span>
 						</router-link>
 					</li>
@@ -33,8 +37,12 @@
 				<ul class="comment-list">
 					<li v-for="item in comment" :key="item.id">
 						<div class="info">
-							<img :src="item.userImg" alt="pic">
-							<span>{{ item.userName }}</span>
+							<el-image fit="cover" :src="item.userImg" class="pic">
+								<div slot="placeholder" class="image-slot">
+									<i class="el-icon-picture-outline"></i>
+								</div>
+							</el-image>
+							<h3>{{ item.userName }}</h3>
 						</div>
 						<div class="cont">
 							<h3>发布于：{{ item.createTimeStr }}</h3>
@@ -206,14 +214,11 @@ export default {
 				height: 160px;
 				border-radius: 5px;
 				cursor: pointer;
-				&:hover img{
+				&:hover .pic{
 					transform: scale(1.05);
 				}
 			}
-			img {
-				width: 100%;
-				height: 100%;
-				object-fit: cover;
+			.pic {
 				transition: all .5s;
 			}
 			span {
@@ -298,28 +303,27 @@ export default {
 			background: #21272f;
 			li {
 				display: flex;
-				padding: 20px 0 10px 30px;
+				padding: 20px 0 10px 0;
+				border-top: 1px solid #333;
 			}
 			.info {
-				display: flex;
-				align-items: flex-start;
 				flex-shrink: 0;
-				img {
-					width: 64px;
-					height: 64px;
-					border-radius: 3px;
-					object-fit: cover;
+				width: 150px;
+				padding: 0 10px;
+				text-align: center;
+				box-sizing: border-box;
+				.pic {
+					width: 80px;
+					height: 80px;
+					border-radius: 50%;
 				}
-				span {
+				h3 {
 					overflow: hidden;
-					width: 150px;
-					padding: 0 30px 0 10px;
+					margin-top: 10px;
 					color: #fff;
 					font-size: 17px;
-					line-height: 1;
 					white-space: nowrap;
 					text-overflow: ellipsis;
-					box-sizing: border-box;
 				}
 			}
 			.cont {

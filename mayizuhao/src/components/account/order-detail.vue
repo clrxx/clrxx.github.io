@@ -11,7 +11,11 @@
 				<div class="cont">
 					<div class="dot">
 						<div class="lt">
-							<img :src="orderInfo.firstImage" alt="pic">
+							<el-image fit="cover" :src="orderInfo.firstImage" class="pic">
+								<div slot="placeholder" class="image-slot">
+									<i class="el-icon-picture-outline"></i>
+								</div>
+							</el-image>
 							<div class="wz">
 								<h3>商品名称：{{ orderInfo.goodTitle.slice(0, 40) }}</h3>
 								<p>游戏区服：{{ orderInfo.goodPath }}</p>
@@ -184,11 +188,11 @@ export default {
 			.lt {
 				display: flex;
 				flex: 1;
-				img {
+				.pic {
 					width: 80px;
 					height: 80px;
 					margin-right: 10px;
-					object-fit: cover;
+					border-radius: 5px;
 				}
 				h3 {
 					max-width: 350px;

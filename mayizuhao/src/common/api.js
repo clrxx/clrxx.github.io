@@ -115,6 +115,13 @@ let apiURL = {
 	UpdateIP: '/apiv2/User/UserIPs/UpdateIP', // <<---------->>修改ip
 
 	AddGood: '/apiv2/User/UserSell/Good/AddGood', // <<---------->>添加商品
+	GetGoodBaseInfo: '/apiv2/User/UserSell/Good/GetGoodBaseInfo', // <<---------->>获取商品的基础信息
+	UpdateGoodBaseInfo: '/apiv2/User/UserSell/Good/UpdateGoodBaseInfo', // <<---------->>修改商品的基础信息
+	GetGoodImage: '/apiv2/User/UserSell/Good/GetGoodImage', // <<---------->>获取商品的图片
+	UpdateGoodImage: '/apiv2/User/UserSell/Good/UpdateGoodImage', // <<---------->>修改商品的图片
+	GetGoodPrice: '/apiv2/User/UserSell/Good/GetGoodPrice', // <<---------->>获取商品的价格信息
+	UpdateGoodPrice: '/apiv2/User/UserSell/Good/UpdateGoodPrice', // <<---------->>修改商品的价格信息
+	SetGoodState: '/apiv2/User/UserSell/Good/SetGoodState', // <<---------->>更改商品的状态
 }
 export const upImgUrl = `${baseURL}/apiv2/Info/Other/UpImgFile`; // <<---------->>上传图片
 
@@ -131,7 +138,7 @@ let post = (url, data) => {
 			})
 	})
 }
-let postAll = (url, data) => {
+let postBack = (url, data) => {
     return new Promise((resolve, reject) => {
 		Axios.post(apiURL[url], data)
 			.then(response => {
@@ -158,5 +165,5 @@ let get = (url) => {
 }
 
 export default {
-    post, postAll, get
+    post, postBack, get
 }

@@ -15,7 +15,11 @@
 					<div class="swiper-container gallery-thumbs">
 						<div class="swiper-wrapper">
 							<div v-for="(item, index) in goodsInfo.imageUrl" :key="index" class="swiper-slide">
-								<img :src="item" alt="pic">
+								<el-image fit="cover" :src="item">
+									<div slot="placeholder" class="image-slot">
+										<i class="el-icon-picture-outline"></i>
+									</div>
+								</el-image>
 							</div>
 						</div>
 					</div>
@@ -128,7 +132,11 @@
 							<div class="lease-carousel">
 								<el-carousel trigger="click" :interval="5000">
 									<el-carousel-item v-for="(item, index) in goodsInfo.imageUrl" :key="index">
-										<img :src="item" alt="pic">
+										<el-image fit="cover" :src="item">
+											<div slot="placeholder" class="image-slot">
+												<i class="el-icon-picture-outline"></i>
+											</div>
+										</el-image>
 									</el-carousel-item>
 								</el-carousel>
 							</div>
@@ -292,11 +300,6 @@ export default {
 		}
 		.swiper-slide-thumb-active {
 			opacity: 1;
-		}
-		img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
 		}
 	}
 	.swiper-button-next, 
@@ -465,9 +468,6 @@ export default {
 		margin: 0 auto;
 		.el-carousel {
 			height: 100%;
-		}
-		img {
-			width: 100%;
 		}
 	}
 </style>

@@ -74,15 +74,14 @@
 				<div v-if="stepActive == 2 || stepActive == 3" class="step-2">
 					<h3>维权记录</h3>
 					<ul v-if="stepActive == 3" class="cont">
-						<li>客服回复：xxxxxxxxxxx</li>
-						<li>处理结果：xxxxxxxxxxx</li>
-						<li>处理描述：xxxxxxxxxxx</li>
+						<li>客服回复：{{ causeInfo.replyContent }}</li>
+						<li>处理结果：{{ causeInfo.stateStr }}</li>
 					</ul>
 					<ul class="cont">
 						<li>于创建维权申请</li>
-						<li>维权原因：xxxxxxxxxxx</li>
+						<li>维权原因：{{ causeInfo.reason }}</li>
 						<li>申请退款金额：￥{{ causeInfo.applyPrice }}</li>
-						<li>申请说明：xxxxxxxxxxx</li>
+						<li>申请说明：{{ causeInfo.summary }}</li>
 					</ul>
 					<div class="mn">维权金额：<span>￥{{ causeInfo.applyPrice }}</span></div>
 					<ul class="dispute-order-info bd">
@@ -217,14 +216,14 @@ export default {
 				return false;
 			}
 		},
-		uploadSuccess (res, file, fileList) {
-			this.uploadImg.push(file.url);
-		},
 		uploadExceed () {
 			this.$notify({
 				title: '温馨提示',
 				message: '最大只能上传10张图片'
 			});
+		},
+		uploadSuccess (res, file, fileList) {
+			this.uploadImg.push(file.url);
 		},
 		uploadRemove (file, fileList) {
 			let _index = this.uploadImg.indexOf(file.url);

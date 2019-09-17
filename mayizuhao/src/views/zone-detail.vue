@@ -6,14 +6,22 @@
 					<div class="swiper-container gallery-swiper">
 						<div class="swiper-wrapper">
 							<div v-for="item in zoneDot.imageUrls" :key="item" class="swiper-slide">
-								<img :src="item" alt="pic">
+								<el-image fit="cover" :src="item">
+									<div slot="placeholder" class="image-slot">
+										<i class="el-icon-picture-outline"></i>
+									</div>
+								</el-image>
 							</div>
 						</div>
 					</div>
 					<div class="swiper-container gallery-thumbs">
 						<div class="swiper-wrapper">
 							<div v-for="item in zoneDot.imageUrls" :key="item" class="swiper-slide">
-								<img :src="item" alt="pic">
+								<el-image fit="cover" :src="item">
+									<div slot="placeholder" class="image-slot">
+										<i class="el-icon-picture-outline"></i>
+									</div>
+								</el-image>
 							</div>
 						</div>
 					</div>
@@ -22,7 +30,11 @@
 				</div>
 				<div class="zone-see-ill">
 					<div class="ill-pic">
-						<img :src="zoneDot.images" alt="pic">
+						<el-image fit="cover" :src="zoneDot.images" class="pic">
+							<div slot="placeholder" class="image-slot">
+								<i class="el-icon-picture-outline"></i>
+							</div>
+						</el-image>
 						<p>{{ zoneDot.summary }}</p>
 					</div>
 					<div class="ill-way">
@@ -100,7 +112,7 @@ export default {
 			})
 		},
 		freePlay () {
-			this.$api.postAll('CheckWangbaInfo')
+			this.$api.postBack('CheckWangbaInfo')
 				.then(res => {
 					if (res.flag) {
 						this.toPaymentDetail();
@@ -155,11 +167,6 @@ export default {
 	}
 	.gallery-swiper {
 		height: 450px;
-		img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-		}
 	}
 	.gallery-thumbs {
 		width: 690px;
@@ -170,11 +177,6 @@ export default {
 		}
 		.swiper-slide-thumb-active {
 			opacity: 1;
-		}
-		img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
 		}
 	}
 	.swiper-button-next, 
@@ -196,10 +198,8 @@ export default {
 		flex-direction: column;
 		justify-content: space-between;
 		width: 460px;
-		img {
-			width: 100%;
+		.pic {
 			height: 210px;
-			object-fit: cover;
 		}
 		p {
 			margin-top: 10px;

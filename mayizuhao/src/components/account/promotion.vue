@@ -60,8 +60,8 @@ export default {
 				})
 		},
 		buildUrl () {
-			let _href = location.href;
-			this.moLink = encodeURI(_href.slice(0, _href.indexOf('/account')) +'?ICode='+ this.proInfo.spreadCode);
+			let _href = window.location.href;
+			this.moLink = encodeURI(_href.slice(0, _href.indexOf('/account')) +'?SCode='+ this.proInfo.spreadCode);
 		}
 	}
 }

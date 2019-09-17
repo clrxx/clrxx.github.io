@@ -2,7 +2,11 @@
 	<div class="account-index">
 		<div class="account-info white-radius">
 			<div class="info">
-				<img :src="userInfo.headImage" alt="pic">
+				<el-image fit="cover" :src="userInfo.headImage" class="pic">
+					<div slot="placeholder" class="image-slot">
+						<i class="el-icon-picture-outline"></i>
+					</div>
+				</el-image>
 				<p>{{ userInfo.name }}</p>
 			</div>
 			<div class="mo">
@@ -10,7 +14,7 @@
 			</div>
 			<div class="btns">
 				<el-button @click="toAccountPay" type="primary" size="small">我要充值</el-button><br>
-  				<el-button @click="toAccountRefund" type="success" size="small">我要提现</el-button>
+  				<!-- <el-button @click="toAccountRefund" type="success" size="small">我要提现</el-button> -->
 			</div>
 		</div>
 		<div class="summing white-radius">
@@ -105,7 +109,7 @@ export default {
 		.info {
 			display: flex;
 			align-items: center;
-			img {
+			.pic {
 				width: 90px;
 				height: 90px;
 				margin-right: 20px;

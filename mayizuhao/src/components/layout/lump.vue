@@ -23,6 +23,7 @@ export default {
 	watch: {
 		$route () {
 			document.documentElement.scrollTop = document.body.scrollTop = 0;
+			sessionStorage.setItem('MYhref', window.location.href);
 		}
 	}
 }

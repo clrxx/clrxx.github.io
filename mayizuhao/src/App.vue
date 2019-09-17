@@ -60,6 +60,20 @@ export default {
 			background: rgba(64, 64, 64, .8) !important;
 		}
 	}
+	.el-image {
+		width: 100%;
+		height: 100%;
+		background: #f5f7fa;
+		.image-slot {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 100%;
+			height: 100%;
+			color: #909399;
+			font-size: 30px;
+		}
+	}
 	.logo-main {
 		.border-right input{
 			border: none;
@@ -118,6 +132,16 @@ export default {
 			padding: 0 20px;
 			background: #F8F8F8;
 		}
+	}
+	.new-games-list .el-image, 
+	.hot-games-list .el-image {
+		background: rgba(0, 0, 0, .6);
+		color: #fff;
+	}
+	.new-games-list .el-image__error, 
+	.hot-games-list .el-image__error {
+		background: transparent;
+		color: #fff;
 	}
 	.lease-carousel {
 		.el-carousel__container {

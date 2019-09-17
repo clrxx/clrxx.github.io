@@ -4,12 +4,12 @@
 		<div class="index-main">
 			<div class="index-banner wh-1300">
 				<div class="games-class">
-					<div @mouseleave="isShowHotGame = false,maskRt = false" class="hot">
+					<div @mouseleave="isShowHotGame = false" class="hot">
 						<ul class="sel-list">
 							<li v-for="(item, index) in popularGoodLen" :key="item.name" @click="toFiltering(item.path)" @mouseenter="hotGameEnter(item.path, index)">{{ item.name }}</li>
 						</ul>
 						<transition name="el-fade-in-linear">
-							<div v-show="isShowHotGame" class="index-popover-cont">
+							<div v-show="isShowHotGame" @mouseenter="fadeHotGameEnter" class="index-popover-cont">
 								<div v-for="item in popularList" :key="item.name" class="cont">
 									<h3 @click="toFiltering(item.path)">{{ item.name }}</h3>
 									<ul class="list">
@@ -18,7 +18,6 @@
 								</div>
 							</div>
 						</transition>
-						<div v-if="maskRt" class="mask-rt"></div>
 					</div>
 					<div class="split">
 						<img src="@/assets/split_c_work.png" alt="pic">
@@ -55,13 +54,25 @@
 					<div v-if="!isShowZone" class="carousel">
 						<el-carousel trigger="click" height="320px" :interval="5000">
 							<el-carousel-item>
-								<img @click="toFiltering('游戏_端游_英雄联盟')" src="https://img.myzuhao.top/%E8%8B%B1%E9%9B%84%E8%81%94%E7%9B%9F%E8%BD%AE%E6%92%AD%E5%9B%BE.jpeg" alt="pic">
+								<el-image fit="cover" @click="toFiltering('游戏_端游_英雄联盟')" src="https://img.myzuhao.top/%E8%8B%B1%E9%9B%84%E8%81%94%E7%9B%9F%E8%BD%AE%E6%92%AD%E5%9B%BE.jpeg">
+									<div slot="placeholder" class="image-slot">
+										<i class="el-icon-picture-outline"></i>
+									</div>
+								</el-image>
 							</el-carousel-item>
 							<el-carousel-item>
-								<img @click="toFiltering('游戏_端游_穿越火线')" src="https://img.myzuhao.top/%E7%A9%BF%E8%B6%8A%E7%81%AB%E7%BA%BF%E8%BD%AE%E6%92%AD%E5%9B%BE.jpeg" alt="pic">
+								<el-image fit="cover" @click="toFiltering('游戏_端游_穿越火线')" src="https://img.myzuhao.top/%E7%A9%BF%E8%B6%8A%E7%81%AB%E7%BA%BF%E8%BD%AE%E6%92%AD%E5%9B%BE.jpeg">
+									<div slot="placeholder" class="image-slot">
+										<i class="el-icon-picture-outline"></i>
+									</div>
+								</el-image>
 							</el-carousel-item>
 							<el-carousel-item>
-								<img @click="toFiltering('游戏_手游_王者荣耀')" src="https://img.myzuhao.top/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80%E8%BD%AE%E6%92%AD%E5%9B%BE.jpg" alt="pic">
+								<el-image fit="cover" @click="toFiltering('游戏_手游_王者荣耀')" src="https://img.myzuhao.top/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80%E8%BD%AE%E6%92%AD%E5%9B%BE.jpg">
+									<div slot="placeholder" class="image-slot">
+										<i class="el-icon-picture-outline"></i>
+									</div>
+								</el-image>
 							</el-carousel-item>
 						</el-carousel>
 					</div>
@@ -69,8 +80,8 @@
 						<img @click="toZone" src="https://img.myzuhao.top/5cdbab19b8bed69358.png" alt="pic">
 					</div>
 					<ul class="help">
-						<li v-for="item in FAQList" :key="item.id">
-							<img @click="toNotice(3, item.id)" src="@/assets/yd.jpg" alt="pic">
+						<li>
+							<img @click="toNotice(3, FAQFid)" src="@/assets/yd.jpg" alt="pic">
 						</li>
 						<li>
 							<img src="@/assets/gzh.jpg" alt="pic">
@@ -87,7 +98,11 @@
 							</div>
 						</div>
 						<div v-if="MYuserInfo" class="lo">
-							<img :src="MYuserInfo.userPic" alt="pic">
+							<el-image fit="cover" :src="MYuserInfo.userPic" class="pic">
+								<div slot="placeholder" class="image-slot">
+									<i class="el-icon-picture-outline"></i>
+								</div>
+							</el-image>
 							<h3>你好，欢迎来到蚂蚁租号</h3>
 							<h4>{{ MYuserInfo.userName }}<span @click="login">【退出】</span></h4>
 						</div>
@@ -117,12 +132,16 @@
 					<ul class="new-games-list">
 						<li v-for="item in newGoodLen" :key="item.name" @click="toFiltering(item.path)">
 							<a :title="item.name">
-								<img :src="item.imageUrl" :alt="item.name">
+								<el-image fit="cover" :src="item.imageUrl" class="pic">
+									<div slot="placeholder" class="image-slot">
+										<i class="el-icon-picture-outline"></i>
+									</div>
+								</el-image>
 								<em class="em-white-mark"></em>
 							</a>
 						</li>
-						<li @click="toFiltering('游戏')">
-							<a><img src="@/assets/more_games.jpg" alt="pic"></a>
+						<li @click="toFiltering('游戏_端游')">
+							<a title="更多游戏"><img src="@/assets/more_games.jpg" alt="pic"></a>
 						</li>
 					</ul>
 				</div>
@@ -132,8 +151,12 @@
 					</div>
 					<ul class="hot-games-list clearfix">
 						<li v-for="(item, index) in hotGoodLen" :key="item.name" @click="toFiltering(item.path)">
-							<a :class="{'item1': index == 0}" :title="item.name">
-								<img :src="item.imageUrl" :alt="item.name">
+							<a :class="{'flt': index == 0}" :title="item.name">
+								<el-image fit="cover" :src="item.imageUrl" class="pic">
+									<div slot="placeholder" class="image-slot">
+										<i class="el-icon-picture-outline"></i>
+									</div>
+								</el-image>
 								<em class="em-white-mark"></em>
 							</a>
 						</li>
@@ -204,10 +227,9 @@ export default {
 			newGood: [],
 			noticeList: [],
 			activityList: [],
-			FAQList: [],
+			FAQFid: 0,
 
 			isShowHotGame: false,
-			maskRt: false,
 			isShowClsGame: false,
 			tabsActive: '1',
 			isShowZone: false,
@@ -215,11 +237,12 @@ export default {
 		}
 	},
 	created () {
-		let _href = location.href;
-		if (_href.indexOf('ICode') > -1) {
-			sessionStorage.setItem('ICode', _href.slice(_href.indexOf('ICode')+6));
+		let _href = window.location.href;
+		if (_href.indexOf('SCode') > -1) {
+			sessionStorage.setItem('SCode', _href.slice(_href.indexOf('SCode')+6));
+			this.isShowZone = true;
 		} else {
-			sessionStorage.removeItem('ICode');
+			sessionStorage.removeItem('SCode');
 		}
 		this.MYuserInfo = JSON.parse(localStorage.getItem('MYuserInfo'));
 		this.$api.post('GetPopularGoodType')
@@ -251,7 +274,7 @@ export default {
 			itemCount: 1,
 			pageIndex: 0
 		}).then(res => {
-			this.FAQList = res.obj.obj;
+			this.FAQFid = res.obj.obj[0].id;
 		});
 	},
 	computed: {
@@ -285,33 +308,34 @@ export default {
 				});
 		},
 		hotGameEnter (path, index) {
-			if (index % 2 == 0) this.maskRt = true;
-			let dataList = [];
-			this.$api.post('GetChildrenType', JSON.stringify(path))
-				.then(res => {
-					let _list = res.obj;
-					let _listLen = _list.length;
-					for (let i=0; i<_listLen; i++) {
-						if (JSON.stringify(_list[i].path).indexOf('峡谷之巅') != -1) {
-							dataList[i] = {
+			this._hotTimer = setTimeout(() => {
+				let hotList = [];
+				this.$api.post('GetChildrenType', JSON.stringify(path))
+					.then(res => {
+						let _list = res.obj;
+						let _listLen = _list.length;
+						for (let i=0; i<_listLen; i++) {
+							if (JSON.stringify(_list[i].path).indexOf('峡谷之巅') != -1) {
+								hotList[i] = {
+									name: _list[i].name,
+									path: _list[i].path,
+								};
+								continue;
+							}
+							hotList[i] = {
 								name: _list[i].name,
 								path: _list[i].path,
+								data: []
 							};
-							continue;
+							this.$api.post('GetChildrenType', JSON.stringify(_list[i].path))
+								.then(res => {
+									hotList[i].data = res.obj;
+								})
 						}
-						dataList[i] = {
-							name: _list[i].name,
-							path: _list[i].path,
-							data: []
-						};
-						this.$api.post('GetChildrenType', JSON.stringify(_list[i].path))
-							.then(res => {
-								dataList[i].data = res.obj;
-							})
-					}
-					this.popularList = dataList;
-				})
-			this.isShowHotGame = true;
+						this.popularList = hotList;
+					})
+				this.isShowHotGame = true;
+			}, 300)
 		},
 		clsGameEnter (path) {
 			this.$api.post('GetChildrenType', JSON.stringify(path))
@@ -319,6 +343,9 @@ export default {
 					this.popularList = res.obj;
 				})
 			this.isShowClsGame = true;
+		},
+		fadeHotGameEnter () {
+			clearTimeout(this._hotTimer);
 		},
 		toZone () {
 			this.$router.push('/zone');
@@ -379,15 +406,6 @@ export default {
 						color: #f60;
 					}
 				}
-			}
-			.mask-rt {
-				position: absolute;
-				top: 0;
-				right: 0;
-				z-index: 3;
-				width: 120px;
-				height: 100%;
-				background: transparent;
 			}
 			.index-popover-cont {
 				top: -30px;
@@ -484,12 +502,6 @@ export default {
 		width: 800px;
 		.carousel {
 			padding: 10px;
-			.el-carousel {
-				img {
-					width: 100%;
-					height: 100%;
-				}
-			}
 		}
 		.ze {
 			overflow: hidden;
@@ -529,13 +541,6 @@ export default {
 		.info {
 			margin-bottom: 50px;
 			text-align: center;
-			img {
-				width: 60px;
-				height: 60px;
-				margin-bottom: 10px;
-				border-radius: 50%;
-				object-fit: cover;
-			}
 			.ln {
 				margin-bottom: 50px;
 				button {
@@ -557,12 +562,14 @@ export default {
 				}
 			}
 			.lo {
-				h3 {
-					text-align: center;
+				.pic {
+					width: 60px;
+					height: 60px;
+					margin-bottom: 10px;
+					border-radius: 50%;
 				}
 				h4 {
 					margin-top: 10px;
-					text-align: center;
 					span {
 						color: #57a3f3;
 						cursor: pointer;
@@ -614,7 +621,11 @@ export default {
 					width: 100%;
 					height: 166px;
 					cursor: pointer;
-					&:hover img {
+					img {
+						width: 100%;
+						height: 100%;
+					}
+					&:hover .pic {
 						transform: scale(1.05);
 					}
 					&:hover .em-white-mark {
@@ -625,8 +636,7 @@ export default {
 						opacity: 0;
 					}
 				}
-				img {
-					width: 100%;
+				.pic {
 					transition: all .5s;
 				}
 			}
@@ -643,7 +653,7 @@ export default {
 					width: 100%;
 					height: 137px;
 					cursor: pointer;
-					&:hover img {
+					&:hover .pic {
 						transform: scale(1.05);
 					}
 					&:hover .em-white-mark {
@@ -654,11 +664,10 @@ export default {
 						opacity: 0;
 					}
 				}
-				.item1 {
+				.flt {
 					height: 285px;
 				}
-				img {
-					width: 100%;
+				.pic {
 					transition: all .5s;
 				}
 			}

@@ -5,7 +5,11 @@
 				<h2><img src="@/assets/order-suc.png" alt="icon">恭喜您下单成功，请按照<span>下面流程</span>进行上号</h2>
 				<ul class="game-info">
 					<li class="game-cont">
-						<img :src="orderInfo.firstImage" alt="pic">
+						<el-image fit="cover" :src="orderInfo.firstImage" class="pic">
+							<div slot="placeholder" class="image-slot">
+								<i class="el-icon-picture-outline"></i>
+							</div>
+						</el-image>
 						<div class="wz">
 							<p>订单：{{ orderInfo.orderCode }}</p>
 							<p>游戏名：{{ orderInfo.goodTitle.slice(0, 20)+'...' }}</p>
@@ -121,9 +125,11 @@ export default {
 		display: flex;
 		align-items: center;
 		border-right: 3px solid #fff;
-		img {
+		.pic {
+			width: 100px;
 			height: 100px;
 			margin-right: 15px;
+			border-radius: 5px;
 		}
 	}
 	.unlock-code {

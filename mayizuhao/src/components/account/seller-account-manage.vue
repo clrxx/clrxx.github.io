@@ -20,70 +20,44 @@
 			<el-tabs v-model="tabsActive" @tab-click="tabsClick">
 				<el-tab-pane v-for="item in tabsArr" :key="item" :label="item" :name="item">
 					<div class="order-info">
-						<div v-if="tabsActive == '可租赁'" class="btns">
-							<el-button size="small">下架</el-button>
-							<el-button size="small">置顶推广</el-button>
-						</div>
-						<div v-if="tabsActive == '仓库中'" class="btns">
-							<el-button size="small">商家</el-button>
-							<el-button size="small">删除</el-button>
-						</div>
-						<div v-if="tabsActive == '已置顶'" class="btns">
-							<el-button size="small">下架</el-button>
-							<el-button size="small">删除</el-button>
-						</div>
-						<div v-if="tabsActive == '展示到渠道'" class="btns">
-							<div class="idu">
-								<p>为拓展商户销量，保障商户收益，商品拓展至部分渠道，应渠道要求，渠道商品无押金！</p>
-								<p>1、您可以选择是否推送您的商品至渠道，推送至渠道的商品押金失效，同时为您带来更多订单和收益。</p>
-								<p>2、已发布商品默认推送至渠道，您可以在下方手动调整</p>
-							</div>
-							<el-button size="small">取消推送</el-button>
-						</div>
-						<div v-if="tabsActive == '不展示到渠道'" class="btns">
-							<div class="idu">
-								<p>为拓展商户销量，保障商户收益，商品拓展至部分渠道，应渠道要求，渠道商品无押金！</p>
-								<p>1、您可以选择是否推送您的商品至渠道，推送至渠道的商品押金失效，同时为您带来更多订单和收益。</p>
-								<p>2、已发布商品默认推送至渠道，您可以在下方手动调整</p>
-							</div>
-							<el-button size="small">推送</el-button>
-						</div>
 						<div class="tables">
-							<el-table :data="tableData" ref="multipleTable" @selection-change="handleSelectionChange">
-								<el-table-column v-if="isShowtableCheckbox" type="selection" width="50"></el-table-column>
+							<el-table :data="tableData" ref="multipleTable">
 								<el-table-column label="帐号信息">
 									<template slot-scope="scope">
 										<div class="dot">
-											<img src="@/assets/activity2.jpg" alt="pic">
+											<el-image fit="cover" :src="scope.row.goodFirstImage" class="pic">
+												<div slot="placeholder" class="image-slot">
+													<i class="el-icon-picture-outline"></i>
+												</div>
+											</el-image>
 											<div>
 												<h3><el-tooltip effect="dark" content="该商品已加入免费专区，用户租号费用由蚂蚁补贴" placement="top"><em>免</em>
-												</el-tooltip>{{ scope.row.name }}</h3>
-												<p>Steam游戏-刀塔自走棋</p>
-												<p>商品编号：3059319485421</p>
+												</el-tooltip>{{ scope.row.goodPath }}</h3>
+												<p>{{ scope.row.title }}</p>
+												<p>商品编号：{{ scope.row.code }}</p>
 											</div>
 										</div>
 									</template>
 								</el-table-column>
-								<el-table-column label="价格" width="150">
+								<el-table-column label="价格" width="120">
 									<template slot-scope="scope">
 										<p class="price">{{ scope.row.price }}</p>
 									</template>
 								</el-table-column>
-								<el-table-column label="押金" width="150">
+								<el-table-column label="押金" width="120">
 									<template slot-scope="scope">
-										<p class="cash">{{ scope.row.cash }}</p>
+										<p class="cash">{{ scope.row.deposit }}</p>
 									</template>
 								</el-table-column>
-								<el-table-column label="商品状态" width="150">
-									<template>
-										<p class="status">展示中</p>
-										<p class="status">出租中</p>
-										<p class="status">仓库中</p>
+								<el-table-column label="商品状态" width="120">
+									<template slot-scope="scope">
+										<p class="status">{{ scope.row.stateStr }}</p>
 									</template>
 								</el-table-column>
-								<el-table-column label="操作" width="160">
+								<el-table-column label="操作" width="180">
 									<template slot-scope="scope">
 										<div class="opts">
+											<!-- <el-link v-if="tabsActive == '可租赁' || tabsActive == '仓库中'" type="warning" @click="handleRemove(scope.$index, scope.row)">下架</el-link> -->
 											<el-link type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-link>
 											<el-link type="danger" @click="handlePass(scope.$index, scope.row)">修改密码</el-link>
 										</div>
@@ -94,16 +68,16 @@
 					</div>
 				</el-tab-pane>
 			</el-tabs>
-			<div class="pagination">
+			<div v-if="tableData.length > 0" class="pagination">
 				<el-pagination :total="pageTotal" :page-size="pageSize" :current-page="pageCurrent" @current-change="pageChange" background layout="prev, pager, next" />
 			</div>
 		</div>
 		<el-dialog custom-class="pay-dialog" title="修改密码" :visible.sync="dialogVisible" @close="dialogClose" width="500px">
 			<el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="form-label-12">
-				<el-form-item label="商品密码" prop="pass">
+				<el-form-item label="商品新密码" prop="pass">
 					<el-input type="password" v-model="ruleForm.pass" size="small"></el-input>
 				</el-form-item>
-				<el-form-item label="确认密码" prop="checkPass">
+				<el-form-item label="确认新密码" prop="checkPass">
 					<el-input type="password" v-model="ruleForm.checkPass" size="small"></el-input>
 				</el-form-item>
 				<el-form-item>
@@ -137,10 +111,13 @@ export default {
 			}
 		};
 		return {
+			goodsCode: '',
 			datePicker: null,
+			orderStateNum: 0,
+			tabsActive: '全部',
+			tabsArr: ['全部', '待审核', '可租赁', '出租中', '仓库中', '维权中'],
+			tableData: [],
 			dialogVisible: false,
-			isShowtableCheckbox: false,
-
 			ruleForm: {
 				pass: '',
 				checkPass: '',
@@ -154,22 +131,6 @@ export default {
 				]
 			},
 
-			tabsActive: '全部',
-			tabsArr: ['全部', '待审核', '可租赁', '仓库中', '出租中', '已置顶', '展示到渠道', '不展示到渠道'],
-			tableData: [
-				// {
-				// 	name: '游戏昵称',
-				// 	price: '￥1.00/小时',
-				// 	cash: '￥0.00',
-				// 	status: '展示中',
-				// }, {
-				// 	name: '游戏昵称',
-				// 	price: '￥1.00/小时',
-				// 	cash: '￥0.00',
-				// 	status: '展示中',
-				// }
-			],
-			
 			pageTotal: 10,
 			pageSize: 10,
 			pageCurrent: 1
@@ -202,9 +163,8 @@ export default {
 			}
 			this.$api.post('SellGoodPage', _params)
 				.then(res => {
-					console.log(res)
-					// this.tableData = res.obj.obj;
-					// this.pageTotal = res.obj.allItemCount;
+					this.tableData = res.obj.obj;
+					this.pageTotal = res.obj.allItemCount;
 				})
 		},
 		datePickerChange (e) {
@@ -221,49 +181,57 @@ export default {
 			let _index = parseInt(e.index);
 			switch (_index) {
 				case 0:
+					this.orderStateNum = 0;
 					break;
 				case 1:
+					this.orderStateNum = 5;
 					break;
 				case 2:
-					this.isShowtableCheckbox = true;
+					this.orderStateNum = 1;
 					break;
 				case 3:
-					this.isShowtableCheckbox = true;
+					this.orderStateNum = 2;
 					break;
 				case 4:
+					this.orderStateNum = 3;
 					break;
 				case 5:
-					this.isShowtableCheckbox = true;
-					break;
-				case 6:
-					this.isShowtableCheckbox = true;
-					break;
-				case 7:
-					this.isShowtableCheckbox = true;
+					this.orderStateNum = 4;
 					break;
 				default:
-					this.isShowtableCheckbox = false;
 					break;
 			}
 			this.pageCurrent = 1;
 			this.cAjax();
 		},
-		handleSelectionChange(e) {
-			console.log(e);
+		handleEdit (index, row) {
+			this.$router.push({path: '/release-change', query: {goodsCode: row.code}});
 		},
-		handleEdit(index, row) {
-			console.log(index, row);
-			this.$router.push('/account/seller-account-edit');
-		},
-		handlePass(index, row) {
+		// handleRemove (index, row) {
+		// 	this.$notify({
+		// 		title: '温馨提示',
+		// 		message: '商品删除成功'
+		// 	});
+		// },
+		handlePass (index, row) {
 			this.dialogVisible = true;
-			console.log(index, row);
+			this.goodsCode = row.code;
 		},
-		submitForm(formName) {
+		submitForm (formName) {
 			this.$refs[formName].validate((valid) => {
 				if (valid) {
-					console.log(this.ruleForm);
-					this.dialogVisible = false;
+					this.$api.post('UpdateGoodBaseInfo', {
+						code: this.goodsCode,
+						accountPwd: this.ruleForm.pass,
+					}).then(res => {
+						this.$notify({
+							title: '温馨提示',
+							message: '商品密码修改成功'
+						});
+						this.ruleForm.pass = '';
+						this.ruleForm.checkPass = '';
+						this.dialogVisible = false;
+					});
 				}
 			});
 		},
@@ -272,6 +240,7 @@ export default {
 		},
 		pageChange (e) {
 			this.pageCurrent = e;
+			this.cAjax();
 		}
 	}
 }
@@ -279,30 +248,17 @@ export default {
 
 <style lang="scss" scoped>
 	.order-info {
-		.btns {
-			margin-bottom: 15px;
-		}
-		.idu {
-			padding: 15px;
-			margin-bottom: 15px;
-			background: #f5f5f5;
-			box-sizing: border-box;
-			p {
-				line-height: 1.5;
-			}
-		}
 		.tables {
 			border: 1px solid #e8eaec;
 			border-bottom: none;
 		}
 		.dot {
 			display: flex;
-			img {
+			.pic {
 				width: 80px;
 				height: 80px;
 				margin-right: 10px;
 				border-radius: 5px;
-				object-fit: cover;
 			}
 			h3 {
 				margin-bottom: 10px;

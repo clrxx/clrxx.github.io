@@ -86,7 +86,7 @@ export default {
 					}
 					if (this.userName) {
 						MYuserInfo.userName = this.userName;
-						location.reload();
+						window.location.reload();
 					}
 					localStorage.setItem('MYuserInfo', JSON.stringify(MYuserInfo));
 					this.userPic = '';

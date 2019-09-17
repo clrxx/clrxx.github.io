@@ -37,7 +37,11 @@
 								</div>
 								<div class="order-cont">
 									<div class="cont item1">
-										<div class="pic" :style="{'background-image': 'url('+ item.imageUrl +')'}"></div>
+										<el-image fit="cover" :src="item.imageUrl" class="pic">
+											<div slot="placeholder" class="image-slot">
+												<i class="el-icon-picture-outline"></i>
+											</div>
+										</el-image>
 										<div class="te">
 											<h4>{{ item.goodTitle? item.goodTitle.slice(0, 30):'' }}</h4>
 											<p>{{ item.goodPath? item.goodPath.slice(0, 30):'' }}</p>
@@ -155,10 +159,10 @@ export default {
 			this.cAjax();
 		},
 		toOrderDetail (code) {
-			this.$router.push({path: '/account/order-detail', query: {orderCode: code}});
+			this.$router.push({path: '/account/order-detail', query: {orderCode: code, accountPath: '/account/buyer-order'}});
 		},
 		toDispute (code) {
-			this.$router.push({path: '/account/dispute', query: {orderCode: code}});
+			this.$router.push({path: '/account/dispute', query: {orderCode: code, accountPath: '/account/buyer-order'}});
 		}
 	}
 }

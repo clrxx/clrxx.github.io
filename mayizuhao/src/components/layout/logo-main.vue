@@ -14,7 +14,7 @@
 									<li><el-radio @change="selGameCls('游戏_手游')" v-model="radioFro" label="2" border size="small">手游</el-radio></li>
 								</ul>
 								<ul class="clist">
-									<li v-for="item in gameGoods" :key="item.name" @click="selGames(item)">{{ item.name }}</li>
+									<li v-for="item in gameSGoods" :key="item.name" @click="selGames(item)">{{ item.name }}</li>
 								</ul>
 							</div>
 							<el-button size="medium" slot="reference" class="border-right">{{ goodsName }} <i class="el-icon-edit"></i></el-button>
@@ -26,7 +26,7 @@
 						</el-select>
 					</li>
 					<li>
-						<el-select v-model="gameEGoodsPath" size="medium" class="border-none" placeholder="请选择">
+						<el-select v-model="gameEGoodsPath" @change="selGameE" size="medium" class="border-none" placeholder="请选择">
 							<el-option v-for="item in gameEGoods" :key="item.name" :label="item.name" :value="item.path" />
 						</el-select>
 					</li>
@@ -42,14 +42,15 @@ export default {
 	data() {
 		return {
 			popVisible: false,
-			goodsName: '选择游戏',
 			radioFro: '1',
-			gameGoods: [],
-			gameGoodsPath: '',
+			goodsName: '选择游戏',
+			gameSGoods: [],
+			gameSGoodsPath: '',
 			gameYGoods: [],
 			gameYGoodsPath: '',
 			gameEGoods: [],
-			gameEGoodsPath: ''
+			gameEGoodsPath: '',
+			gameAllGoodsPath: '',
 		}
 	},
 	created () {
@@ -59,12 +60,13 @@ export default {
 		selGameCls (path) {
 			this.$api.post('GetChildrenType', JSON.stringify(path))
 				.then(res => {
-					this.gameGoods = res.obj;
+					this.gameSGoods = res.obj;
 				})
 		},
 		selGames (item, index) {
 			this.goodsName = item.name;
-			this.gameGoodsPath = item.path;
+			this.gameSGoodsPath = item.path;
+			this.gameAllGoodsPath = item.path;
 			this.recode();
 			this.$api.post('GetChildrenType', JSON.stringify(item.path))
 				.then(res => {
@@ -72,23 +74,19 @@ export default {
 				})
 		},
 		selGameY (path) {
+			this.gameAllGoodsPath = path;
 			this.$api.post('GetChildrenType', JSON.stringify(path))
 				.then(res => {
 					this.gameEGoods = res.obj;
 				})
 		},
+		selGameE (path) {
+			this.gameAllGoodsPath = path;
+		},
 		gameSearch () {
 			let goodsId;
-			if (!this.gameEGoodsPath) {
-				if (!this.gameYGoodsPath) {
-					if (!this.gameGoodsPath) {
-						goodsId = '游戏_端游';
-					} else {
-						goodsId = this.gameGoodsPath;
-					}
-				} else {
-					goodsId = this.gameYGoodsPath;
-				}
+			if (!this.gameAllGoodsPath) {
+				goodsId = '游戏_端游';
 			} else {
 				goodsId = this.gameEGoodsPath;
 			}
@@ -104,6 +102,13 @@ export default {
 			this.gameYGoodsPath = '';
 			this.gameEGoods = [];
 			this.gameEGoodsPath = '';
+		}
+	},
+	watch: {
+		$route () {
+			this.goodsName = '选择游戏';
+			this.radioFro = '1';
+			this.recode();
 		}
 	}
 }

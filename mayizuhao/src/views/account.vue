@@ -193,9 +193,6 @@ export default {
 					width: 80px;
 					height: 80px;
 					margin-right: 10px;
-					background-repeat: no-repeat;
-					background-size: cover;
-					background-position: center;
 					border-radius: 5px;
 				}
 				.te {
