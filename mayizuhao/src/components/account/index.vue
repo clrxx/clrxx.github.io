@@ -36,7 +36,7 @@
 			<div class="sys-info">
 				<ul class="sys-list">
 					<li v-for="item in msgInfo" :key="item.id">
-						<h3>{{ item.title }}</h3>
+						<h3 :title="item.title">{{ item.title }}</h3>
 						<p>{{ item.createTime | formatDateTime }}</p>
 					</li>
 				</ul>
@@ -70,7 +70,7 @@ export default {
 		this.$api.post('Cash')
 			.then(res => {
 				this.cash = res.obj;
-				this.rate = (this.cash.orderSuccessCount/this.cash.orderCount).toFixed(2)*100 +'%';
+				this.rate = (this.cash.orderSuccessCount/this.cash.orderCount*100).toFixed(2)+'%';
 			});
 		this.mAjax();
 	},

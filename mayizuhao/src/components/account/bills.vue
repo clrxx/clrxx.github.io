@@ -30,6 +30,11 @@ export default {
 	methods: {
 		cAjax () {
 			this.$api.post('CashChangedPage', {
+				createTimeOrder: {
+					flag: true,
+					desc: true,
+					index: 0
+				},
 				itemCount: this.pageSize,
 				pageIndex: (this.pageCurrent - 1)
 			}).then(res => {

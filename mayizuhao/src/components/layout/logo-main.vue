@@ -4,31 +4,43 @@
 			<div @click="toIndexPage" class="logo">
 				<img src="@/assets/logo-gray.png" alt="logo">
 			</div>
-			<div class="sel-cont">
+			<div v-if="isShowSearch" class="sel-cont">
 				<ul class="sel-list">
 					<li>
-						<el-popover width="800" placement="bottom-start" v-model="popVisible">
+						<el-popover width="800" placement="bottom" v-model="popGs">
 							<div class="pop-game-cont">
 								<ul class="llist">
 									<li><el-radio @change="selGameCls('游戏_端游')" v-model="radioFro" label="1" border size="small">端游</el-radio></li>
 									<li><el-radio @change="selGameCls('游戏_手游')" v-model="radioFro" label="2" border size="small">手游</el-radio></li>
 								</ul>
 								<ul class="clist">
-									<li v-for="item in gameSGoods" :key="item.name" @click="selGames(item)">{{ item.name }}</li>
+									<li v-for="item in gameSGoods" :key="item.name" @click="selGameSs(item)">{{ item.name }}</li>
 								</ul>
 							</div>
-							<el-button size="medium" slot="reference" class="border-right">{{ goodsName }} <i class="el-icon-edit"></i></el-button>
+							<el-button size="medium" slot="reference" :title="gameSName">{{ gameSName }}</el-button>
 						</el-popover>
 					</li>
 					<li>
-						<el-select v-model="gameYGoodsPath" @change="selGameY" size="medium" class="border-right" placeholder="请选择">
-							<el-option v-for="item in gameYGoods" :key="item.name" :label="item.name" :value="item.path" />
-						</el-select>
+						<el-popover width="800" placement="bottom" v-model="popYs">
+							<div class="pop-game-cont">
+								<div v-if="gameYGoods.length == 0" class="null-data">暂无相关数据</div>
+								<ul class="clist">
+									<li v-for="item in gameYGoods" :key="item.name" @click="selGameYs(item)">{{ item.name }}</li>
+								</ul>
+							</div>
+							<el-button size="medium" slot="reference" :title="gameYName">{{ gameYName }}</el-button>
+						</el-popover>
 					</li>
 					<li>
-						<el-select v-model="gameEGoodsPath" @change="selGameE" size="medium" class="border-none" placeholder="请选择">
-							<el-option v-for="item in gameEGoods" :key="item.name" :label="item.name" :value="item.path" />
-						</el-select>
+						<el-popover width="800" placement="bottom" v-model="popEs">
+							<div class="pop-game-cont">
+								<div v-if="gameEGoods.length == 0" class="null-data">暂无相关数据</div>
+								<ul class="clist">
+									<li v-for="item in gameEGoods" :key="item.name" @click="selGameEs(item)">{{ item.name }}</li>
+								</ul>
+							</div>
+							<el-button size="medium" slot="reference" :title="gameEName">{{ gameEName }}</el-button>
+						</el-popover>
 					</li>
 					<li><el-button @click="gameSearch" type="danger" size="medium">搜索</el-button></li>
 				</ul>
@@ -41,54 +53,67 @@
 export default {
 	data() {
 		return {
-			popVisible: false,
+			isShowSearch: true,
+			popGs: false,
+			popYs: false,
+			popEs: false,
 			radioFro: '1',
-			goodsName: '选择游戏',
 			gameSGoods: [],
-			gameSGoodsPath: '',
+			gameSName: '选择游戏',
 			gameYGoods: [],
-			gameYGoodsPath: '',
+			gameYName: '请选择游戏区',
 			gameEGoods: [],
-			gameEGoodsPath: '',
-			gameAllGoodsPath: '',
+			gameEName: '请选择游戏服',
+			gameFullPath: '',
 		}
 	},
 	created () {
 		this.selGameCls('游戏_端游');
+		if (this.$route.path == '/filtering') {
+			this.isShowSearch = false;
+		}
 	},
 	methods: {
+		// 端游/手游
 		selGameCls (path) {
 			this.$api.post('GetChildrenType', JSON.stringify(path))
 				.then(res => {
 					this.gameSGoods = res.obj;
 				})
 		},
-		selGames (item, index) {
-			this.goodsName = item.name;
-			this.gameSGoodsPath = item.path;
-			this.gameAllGoodsPath = item.path;
+		// 选择游戏
+		selGameSs (item) {
 			this.recode();
+			this.gameSName = item.name;
+			this.gameFullPath = item.path;
 			this.$api.post('GetChildrenType', JSON.stringify(item.path))
 				.then(res => {
 					this.gameYGoods = res.obj;
 				})
 		},
-		selGameY (path) {
-			this.gameAllGoodsPath = path;
-			this.$api.post('GetChildrenType', JSON.stringify(path))
+		// 一级选择
+		selGameYs (item) {
+			this.popYs = false;
+			this.gameYName = item.name;
+			this.gameFullPath = item.path;
+			this.$api.post('GetChildrenType', JSON.stringify(item.path))
 				.then(res => {
 					this.gameEGoods = res.obj;
 				})
 		},
-		selGameE (path) {
-			this.gameAllGoodsPath = path;
+		// 二级选择
+		selGameEs (item) {
+			this.popEs = false;
+			this.gameEName = item.name;
+			this.gameFullPath = item.path;
 		},
+		// 搜索商品
 		gameSearch () {
 			let goodsId;
-			if (!this.gameAllGoodsPath) {
+			if (!this.gameFullPath) {
 				goodsId = '游戏_端游';
 			} else {
-				goodsId = this.gameEGoodsPath;
+				goodsId = this.gameFullPath;
 			}
 			this.$router.push({path: '/filtering', query: {goodsId}});
 		},
@@ -97,24 +122,33 @@ export default {
 		},
 		// 重新赋值
 		recode () {
-			this.popVisible = false;
+			this.popGs = false;
 			this.gameYGoods = [];
-			this.gameYGoodsPath = '';
+			this.gameYName = '请选择游戏区';
 			this.gameEGoods = [];
-			this.gameEGoodsPath = '';
+			this.gameEName = '请选择游戏服';
 		}
 	},
 	watch: {
-		$route () {
-			this.goodsName = '选择游戏';
-			this.radioFro = '1';
+		$route (to) {
 			this.recode();
+			this.radioFro = '1';
+			this.gameSName = '选择游戏';
+			if (to.path == '/filtering') {
+				this.isShowSearch = false;
+			} else {
+				this.isShowSearch = true;
+			}
 		}
 	}
 }
 </script>
 
 <style lang="scss" scoped>
+	.null-data {
+		padding-top: 10px;
+		text-align: center;
+	}
 	.logo-main {
 		padding-top: 20px;
 		background: #f5f7f9;
@@ -135,17 +169,15 @@ export default {
 	.sel-cont {
 		overflow: hidden;
 		border: 1px solid #F56C6C;
+		border-right: none;
 		border-radius: 5px;
 	}
 	.sel-list {
 		display: flex;
 		flex-wrap: wrap;
-		.el-select {
-			width: 120px;
-		}
-		.el-button.border-right {
+		.el-button {
 			overflow: hidden;
-			max-width: 120px;
+			max-width: 130px;
 			height: 36px;
 			text-overflow: ellipsis;
 			border: none;
@@ -168,11 +200,10 @@ export default {
 			flex-wrap: wrap;
 			overflow: auto;
 			max-height: 300px;
-			padding: 30px 0;
+			padding-top: 10px;
 			li {
 				width: calc(100% / 5);
-				height: 40px;
-				padding: 0 10px;
+				padding: 10px;
 				box-sizing: border-box;
 				cursor: pointer;
 				&:hover {

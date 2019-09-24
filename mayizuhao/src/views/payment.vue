@@ -43,6 +43,13 @@
 				<img class="i1" src="@/assets/learn3.png">
 			</div>
 		</div>
+		
+		<el-dialog custom-class="pay-dialog" title="温馨提示" :visible.sync="dialogVisible" width="500px">
+			<p><img src="@/assets/notice.png" alt="icon">请先打开对应游戏客户端，再下载上号器上号（解锁码粘贴到上号器请按键盘Ctrl+V）</p>
+			<div slot="footer">
+				<el-button type="danger" class="danger"  @click="dialogVisible = false">我已打开游戏客户端</el-button>
+			</div>
+		</el-dialog>
 	</div>
 </template>
 
@@ -50,6 +57,7 @@
 export default {
 	data () {
 		return {
+			dialogVisible: false,
 			clipCont: '',
 			orderInfo: {
 				goodTitle: ''
@@ -61,6 +69,7 @@ export default {
 			.then(res => {
 				this.orderInfo = res.obj;
 				this.clipCont = this.orderInfo.goodLoginString;
+				this.dialogVisible = true;
 			});
 	},
 	methods: {
@@ -217,6 +226,15 @@ export default {
 		}
 		.i1 {
 			margin-left: 60px;
+		}
+	}
+	.pay-dialog {
+		img {
+			margin-right: 5px;
+		}
+		p {
+			color: red;
+			line-height: 1.5;
 		}
 	}
 </style>

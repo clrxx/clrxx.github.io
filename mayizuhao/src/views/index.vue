@@ -4,9 +4,14 @@
 		<div class="index-main">
 			<div class="index-banner wh-1300">
 				<div class="games-class">
-					<div @mouseleave="isShowHotGame = false" class="hot">
+					<div class="hot">
 						<ul class="sel-list">
-							<li v-for="(item, index) in popularGoodLen" :key="item.name" @click="toFiltering(item.path)" @mouseenter="hotGameEnter(item.path, index)">{{ item.name }}</li>
+							<li v-for="item in popularGoodLen" :key="item.name" @click="toFiltering(item.path)">{{ item.name }}</li>
+						</ul>
+					</div>
+					<!-- <div @mouseleave="isShowHotGame = false" class="hot">
+						<ul class="sel-list">
+							<li v-for="item in popularGoodLen" :key="item.name" @click="toFiltering(item.path)" @mouseenter="hotGameEnter(item.path)">{{ item.name }}</li>
 						</ul>
 						<transition name="el-fade-in-linear">
 							<div v-show="isShowHotGame" @mouseenter="fadeHotGameEnter" class="index-popover-cont">
@@ -18,7 +23,7 @@
 								</div>
 							</div>
 						</transition>
-					</div>
+					</div> -->
 					<div class="split">
 						<img src="@/assets/split_c_work.png" alt="pic">
 					</div>
@@ -111,7 +116,7 @@
 						<div class="tabs">
 							<el-tabs v-model="tabsActive">
 								<el-tab-pane label="最新公告" name="1">
-									<a v-for="item in noticeList" :key="item.id" @click="toNotice(1, item.id)">{{ item.title }}</a>
+									<a v-for="item in noticeList" :key="item.id" :title="item.title" @click="toNotice(1, item.id)">{{ item.title }}</a>
 								</el-tab-pane>
 								<el-tab-pane label="活动中心" name="2">
 									<a v-for="item in activityList" :key="item.id" @click="toNotice(2, item.id)">{{ item.title }}</a>
@@ -307,45 +312,45 @@ export default {
 					this.$router.push('/auth');
 				});
 		},
-		hotGameEnter (path, index) {
-			this._hotTimer = setTimeout(() => {
-				let hotList = [];
-				this.$api.post('GetChildrenType', JSON.stringify(path))
-					.then(res => {
-						let _list = res.obj;
-						let _listLen = _list.length;
-						for (let i=0; i<_listLen; i++) {
-							if (JSON.stringify(_list[i].path).indexOf('峡谷之巅') != -1) {
-								hotList[i] = {
-									name: _list[i].name,
-									path: _list[i].path,
-								};
-								continue;
-							}
-							hotList[i] = {
-								name: _list[i].name,
-								path: _list[i].path,
-								data: []
-							};
-							this.$api.post('GetChildrenType', JSON.stringify(_list[i].path))
-								.then(res => {
-									hotList[i].data = res.obj;
-								})
-						}
-						this.popularList = hotList;
-					})
-				this.isShowHotGame = true;
-			}, 300)
-		},
+		// hotGameEnter (path) {
+		// 	this._hotTimer = setTimeout(() => {
+		// 		let hotList = [];
+		// 		this.$api.post('GetChildrenType', JSON.stringify(path))
+		// 			.then(res => {
+		// 				let _list = res.obj;
+		// 				let _listLen = _list.length;
+		// 				for (let i=0; i<_listLen; i++) {
+		// 					if (JSON.stringify(_list[i].path).indexOf('峡谷之巅') != -1) {
+		// 						hotList[i] = {
+		// 							name: _list[i].name,
+		// 							path: _list[i].path,
+		// 						};
+		// 						continue;
+		// 					}
+		// 					hotList[i] = {
+		// 						name: _list[i].name,
+		// 						path: _list[i].path,
+		// 						data: []
+		// 					};
+		// 					this.$api.post('GetChildrenType', JSON.stringify(_list[i].path))
+		// 						.then(res => {
+		// 							hotList[i].data = res.obj;
+		// 						})
+		// 				}
+		// 				this.popularList = hotList;
+		// 			})
+		// 		this.isShowHotGame = true;
+		// 	}, 300)
+		// },
+		// fadeHotGameEnter () {
+		// 	clearTimeout(this._hotTimer);
+		// },
 		clsGameEnter (path) {
 			this.$api.post('GetChildrenType', JSON.stringify(path))
 				.then(res => {
 					this.popularList = res.obj;
 				})
 			this.isShowClsGame = true;
-		},
-		fadeHotGameEnter () {
-			clearTimeout(this._hotTimer);
 		},
 		toZone () {
 			this.$router.push('/zone');

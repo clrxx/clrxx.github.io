@@ -7,7 +7,7 @@
 		<null-data v-if="tableData.length == 0" />
 		<ul class="notice-list">
 			<li v-for="item in tableData" :key="item.id" @click="toNoticeDetail(item.id)">
-				<h3>{{ item.title }}</h3>
+				<h3 :title="item.title">{{ item.title }}</h3>
 				<p>{{ item.createTime | formatDateTime }}</p>
 			</li>
 		</ul>

@@ -16,16 +16,16 @@
 									<li v-for="item in gameSGoods" :key="item.name" @click="selGames(item)">{{ item.name }}</li>
 								</ul>
 							</div>
-							<el-button size="medium" slot="reference" class="border-right">{{ goodsName }} <i class="el-icon-edit"></i></el-button>
+							<el-button size="medium" slot="reference" :title="goodsName">{{ goodsName }} <i class="el-icon-edit"></i></el-button>
 						</el-popover>
 					</li>
 					<li v-if="gameYGoods.length > 0">
-						<el-select v-model="gameYGoodsPath" @change="selGameY" size="medium" class="border-right" placeholder="请选择">
+						<el-select v-model="gameYGoodsPath" @change="selGameYs" size="medium" placeholder="请选择">
 							<el-option v-for="item in gameYGoods" :key="item.name" :label="item.name" :value="item.path" />
 						</el-select>
 					</li>
 					<li v-if="gameEGoods.length > 0">
-						<el-select v-model="gameEGoodsPath" size="medium" class="border-none" placeholder="请选择">
+						<el-select v-model="gameEGoodsPath" size="medium" placeholder="请选择">
 							<el-option v-for="item in gameEGoods" :key="item.name" :label="item.name" :value="item.path" />
 						</el-select>
 					</li>
@@ -290,15 +290,15 @@ export default {
 				})
 		},
 		selGames (item, index) {
+			this.recode();
 			this.goodsName = item.name;
 			this.gameSGoodsPath = item.path;
-			this.recode();
 			this.$api.post('GetChildrenType', JSON.stringify(item.path))
 				.then(res => {
 					this.gameYGoods = res.obj;
 				})
 		},
-		selGameY (path) {
+		selGameYs (path) {
 			this.$api.post('GetChildrenType', JSON.stringify(path))
 				.then(res => {
 					this.gameEGoods = res.obj;

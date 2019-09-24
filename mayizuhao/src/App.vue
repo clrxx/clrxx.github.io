@@ -163,6 +163,11 @@ export default {
 			width: 25px;
 		}
 	}
+	.lease-dialog{
+		.el-dialog__header {
+			border-bottom: 1px solid #e8eaec;
+		}
+	}
 	.pay-dialog {
 		border-radius: 5px !important;
 		.el-dialog__header {

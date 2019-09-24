@@ -6,14 +6,14 @@
 					<el-breadcrumb separator-class="el-icon-arrow-right">
 						<el-breadcrumb-item>您的位置</el-breadcrumb-item>
 						<el-breadcrumb-item>租号中心</el-breadcrumb-item>
-						<el-breadcrumb-item>{{ goodsName }}</el-breadcrumb-item>
+						<el-breadcrumb-item>{{ gameSName }}</el-breadcrumb-item>
 					</el-breadcrumb>
-					<a @click="refresh" class="clear">清空筛选条件</a>
+					<!-- <a @click="refresh" class="clear">清空筛选条件</a> -->
 				</div>
 				<div class="sel-cont">
 					<h4>热门端游</h4>
 					<ul class="sel-list game">
-						<li v-for="item in pcGoodsLen" :key="item.name" @click="selGames(item, 0)">
+						<li v-for="item in pcGoodsLen" :key="item.name" @click="selGameSs(item)">
 							<el-tooltip class="item" effect="dark" :content="item.name" placement="top">
 								<el-image fit="cover" :src="item.imageUrl">
 									<div slot="placeholder" class="image-slot">
@@ -27,7 +27,7 @@
 				<div class="sel-cont">
 					<h4>热门手游</h4>
 					<ul class="sel-list game">
-						<li v-for="item in moGoodsLen" :key="item.name" @click="selGames(item, 0)">
+						<li v-for="item in moGoodsLen" :key="item.name" @click="selGameSs(item)">
 							<el-tooltip class="item" effect="dark" :content="item.name" placement="top">
 								<el-image fit="cover" :src="item.imageUrl">
 									<div slot="placeholder" class="image-slot">
@@ -39,38 +39,56 @@
 					</ul>
 				</div>
 				<div class="sel-cont">
-					<h4 class="sl">游戏类型</h4>
-					<ul class="sel-list">
+					<h4 class="sl">游戏区服</h4>
+					<ul class="sel-list pop">
 						<li>
-							<el-popover width="800" placement="bottom-start" v-model="popVisible">
+							<el-popover width="800" placement="bottom-start" v-model="popGs">
 								<div class="pop-game-cont">
 									<ul class="llist">
 										<li><el-radio @change="selGameCls('游戏_端游')" v-model="radioFro" label="1" border size="small">端游</el-radio></li>
 										<li><el-radio @change="selGameCls('游戏_手游')" v-model="radioFro" label="2" border size="small">手游</el-radio></li>
 									</ul>
 									<ul class="clist">
-										<li v-for="item in gameSGoods" :key="item.name" @click="selGames(item)">{{ item.name }}</li>
+										<li v-for="item in gameSGoods" :key="item.name" @click="selGameSs(item)">{{ item.name }}</li>
 									</ul>
 								</div>
-								<el-button size="medium" slot="reference">{{ goodsName }} <i class="el-icon-edit"></i></el-button>
+								<el-button size="medium" slot="reference" :title="gameSName">{{ gameSName }} <i class="el-icon-edit"></i></el-button>
 							</el-popover>
 						</li>
-						<li v-if="gameYGoods.length > 0">
-							<el-select v-model="gameYGoodsPath" @change="selGameY" size="medium" placeholder="请选择">
-								<el-option v-for="item in gameYGoods" :key="item.name" :label="item.name" :value="item.path" />
-							</el-select>
+						<li>
+							<el-popover width="800" placement="bottom-start" v-model="popYs">
+								<div class="pop-game-cont">
+									<div v-if="gameYGoods.length == 0" class="null-data">暂无相关数据</div>
+									<ul class="clist">
+										<li v-for="item in gameYGoods" :key="item.name" @click="selGameYs(item)">{{ item.name }}</li>
+									</ul>
+								</div>
+								<el-button size="medium" slot="reference" :title="gameYName">{{ gameYName }}</el-button>
+							</el-popover>
 						</li>
-						<li v-if="gameEGoods.length > 0">
-							<el-select v-model="gameEGoodsPath" @change="selGameE" size="medium" placeholder="请选择">
-								<el-option v-for="item in gameEGoods" :key="item.name" :label="item.name" :value="item.path" />
-							</el-select>
+						<li>
+							<el-popover width="800" placement="bottom" v-model="popEs">
+								<div class="pop-game-cont">
+									<div v-if="gameEGoods.length == 0" class="null-data">暂无相关数据</div>
+									<ul class="clist">
+										<li v-for="item in gameEGoods" :key="item.name" @click="selGameEs(item)">{{ item.name }}</li>
+									</ul>
+								</div>
+								<el-button size="medium" slot="reference" :title="gameEName">{{ gameEName }}</el-button>
+							</el-popover>
 						</li>
-						<li><el-button @click="gameSearch" type="danger" size="medium">点击搜索</el-button></li>
 					</ul>
 				</div>
 				<div class="sel-cont">
 					<h4 class="sl">高级选项</h4>
 					<ul class="sel-list sort">
+						<li>
+							<el-popover placement="bottom">
+								<el-button @click="descFn(2)" size="mini" class="lt-btn">由低到高</el-button>
+								<el-button @click="descFn(1)" size="mini" class="lt-btn">由高到低</el-button>
+								<el-button @click="showFixedTagsShow('价格排序')" slot="reference">价格排序</el-button>
+							</el-popover>
+						</li>
 						<li v-for="item in advancedOptions" :key="item.name">
 							<el-popover placement="bottom">
 								<div v-if="item.decide == 1" class="input-number">
@@ -79,10 +97,6 @@
 								</div>
 								<div v-if="item.decide == 2">
 									<el-button v-for="ime in fixedTagsBtnSel" :key="ime" @click="addFixedTags(item.name, ime)" size="mini" class="lt-btn">{{ ime }}</el-button>
-								</div>
-								<div v-if="item.name == '价格排序'">
-									<el-button @click="descFn(2)" size="mini" class="lt-btn">由低到高</el-button>
-									<el-button @click="descFn(1)" size="mini" class="lt-btn">由高到低</el-button>
 								</div>
 								<el-button @click="showFixedTagsShow(item)" slot="reference">{{ item.name }}</el-button>
 							</el-popover>
@@ -103,7 +117,7 @@
 								</el-image>
 							</div>
 							<div class="recom">
-								<h3>{{ item.name }}</h3>
+								<h3 :title="item.name">{{ item.name }}</h3>
 								<h4>{{ item.typeName }}</h4>
 								<div class="tag">
 									<span>{{ item.stateStr }}</span>
@@ -135,16 +149,17 @@ export default {
 			pcGoods: [],
 			moGoods: [],
 
-			popVisible: false,
+			popGs: false,
+			popYs: false,
+			popEs: false,
 			radioFro: '1',
-			goodsName: '选择游戏',
 			gameSGoods: [],
-			gameSGoodsPath: '',
+			gameSName: '选择游戏',
 			gameYGoods: [],
-			gameYGoodsPath: '',
+			gameYName: '请选择游戏区',
 			gameEGoods: [],
-			gameEGoodsPath: '',
-			gameAllGoodsPath: '',
+			gameEName: '请选择游戏服',
+			gameFullPath: '',
 
 			advancedOptions: [],
 			fixedTagsObj: {},
@@ -173,18 +188,22 @@ export default {
 		}
 		let _listLen = _list.length;
 		if (_listLen >= 2) {
-			this.selGames({
+			this.selGameSs({
 				name: _vlist[2],
 				path: _query.slice(0, _list[2]),
 			});
-			this.gameSGoodsPath = _query.slice(0, _list[2]);
 		}
 		if (_listLen >= 3) {
-			this.selGameY(_query.slice(0, _list[3]));
-			this.gameYGoodsPath = _query.slice(0, _list[3]);
+			this.selGameYs({
+				name: _vlist[3],
+				path: _query.slice(0, _list[3])
+			});
 		}
 		if (_listLen >= 4) {
-			this.gameEGoodsPath = _query;
+			this.selGameEs({
+				name: _vlist[4],
+				path: _query.slice(0, _list[4])
+			});
 		}
 		// end
 		this.$api.post('GetChildrenType', JSON.stringify('游戏_端游'))
@@ -209,36 +228,45 @@ export default {
 		}
 	},
 	methods: {
+		// 端游/手游
 		selGameCls (path) {
 			this.$api.post('GetChildrenType', JSON.stringify(path))
 				.then(res => {
 					this.gameSGoods = res.obj;
 				})
 		},
-		selGames (item, index) {
-			this.goodsName = item.name;
-			this.gameSGoodsPath = item.path;
-			this.gameAllGoodsPath = item.path;
+		// 选择游戏
+		selGameSs (item) {
 			this.recode();
+			this.gameSName = item.name;
+			this.gameFullPath = item.path;
 			this.$api.post('GetChildrenType', JSON.stringify(item.path))
 				.then(res => {
 					this.gameYGoods = res.obj;
 				})
-			if (index == 0) this.gameSearch();
+			this.gameSearch();
 		},
-		selGameY (path) {
-			this.gameAllGoodsPath = path;
-			this.$api.post('GetChildrenType', JSON.stringify(path))
+		// 一级选择
+		selGameYs (item) {
+			this.popYs = false;
+			this.gameYName = item.name;
+			this.gameFullPath = item.path;
+			this.$api.post('GetChildrenType', JSON.stringify(item.path))
 				.then(res => {
 					this.gameEGoods = res.obj;
 				})
+			this.gameSearch();
 		},
-		selGameE (path) {
-			this.gameAllGoodsPath = path;
+		// 二级选择
+		selGameEs (item) {
+			this.popEs = false;
+			this.gameEName = item.name;
+			this.gameFullPath = item.path;
+			this.gameSearch();
 		},
-		// 点击搜索商品
+		// 搜索商品
 		gameSearch () {
-			this.$router.replace({path: this.$route.path, query: {goodsId: this.gameAllGoodsPath}});
+			this.$router.replace({path: this.$route.path, query: {goodsId: this.gameFullPath}});
 			this.pageCurrent = 1;
 			this.advancedOptions = [];
 			this.getSupportScopeTags();
@@ -263,10 +291,6 @@ export default {
 			this.$api.post('GetSupportFixedTags', this.$route.query.goodsId)
 				.then(res => {
 					this.fixedTagsObj = res.obj;
-					this.advancedOptions.unshift({
-						name: '价格排序',
-						decide: 2
-					});
 					for (let key in this.fixedTagsObj) {
 						this.advancedOptions.push({
 							name: key,
@@ -370,20 +394,16 @@ export default {
 			this.pageCurrent = e;
 			this.goodsPage();
 		},
-		// 清空筛选
-		refresh () {
-			window.location.reload();
-		},
-		toLease (id, res) {
-			this.$router.push({path: '/lease', query: {leaseId: id, resId: res}});
+		toLease (code, res) {
+			this.$router.push({path: '/lease', query: {leaseCode: code, resCode: res}});
 		},
 		// 重新赋值
 		recode () {
-			this.popVisible = false;
+			this.popGs = false;
 			this.gameYGoods = [];
-			this.gameYGoodsPath = '';
+			this.gameYName = '请选择游戏区';
 			this.gameEGoods = [];
-			this.gameEGoodsPath = '';
+			this.gameEName = '请选择游戏服';
 			this.fixedTags = [];
 			this.scopeTags = [];
 			this.minNum = 0;
@@ -394,6 +414,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+	.null-data {
+		padding-top: 10px;
+		text-align: center;
+	}
 	.filtering {
 		padding-bottom: 30px;
 	}
@@ -437,13 +461,19 @@ export default {
 				position: relative;
 				padding: 0 15px;
 			}
-			.el-select {
-				width: 150px;
-			}
 			&.game {
 				li {
 					width: 130px;
 					height: 60px;
+				}
+			}
+			&.pop {
+				.el-button {
+					overflow: hidden;
+					min-width: 120px;
+					max-width: 150px;
+					text-overflow: ellipsis;
+					border-right: 1px solid #DCDFE6;
 				}
 			}
 		}
@@ -491,7 +521,7 @@ export default {
 			flex-wrap: wrap;
 			overflow: auto;
 			max-height: 300px;
-			padding: 30px 0;
+			padding-top: 10px;
 			li {
 				width: calc(100% / 5);
 				height: 40px;

@@ -33,11 +33,11 @@
 						<h4>上号方式：{{ goodsInfo.goodLoginStr }}</h4>
 					</div>
 					<ul class="dur">
-						<li @click="zuMayFn(1)" :class="{active: zuMayId == 1}">
+						<li @click="leaseWaySel(1)" :class="{active: leaseWayId == 1}">
 							<span>时租</span>
 							<p>{{ goodsInfo.price.price }}元/时</p>
 						</li>
-						<li v-if="goodsInfo.price.baoTian" @click="zuMayFn(2)" :class="{active: zuMayId == 2}">
+						<li v-if="goodsInfo.price.baoTian" @click="leaseWaySel(2)" :class="{active: leaseWayId == 2}">
 							<span>包天</span>
 							<p>{{ goodsInfo.price.baoTianPrice }}元/天</p>
 						</li>
@@ -45,7 +45,7 @@
 					<div class="int">
 						<p>押金：{{ goodsInfo.depositPrice }}元</p>
 						<p>起租时间：{{ goodsInfo.price.minCount }}小时起租</p>
-						<div class="am">租赁时长：<el-input-number v-model="leaseNum" @change="countChange" :min="leaseMinNum" :max="leaseMaxNum" /></div>
+						<div class="am">租赁时长：<el-input-number v-model="leaseTime" @change="countChange" :min="leaseMinNum" :max="leaseMaxNum" /></div>
 						<el-button type="danger" @click="toLeaseOrder">立即租用/在架</el-button>
 						<el-button v-if="isSpread && isShowLtc == '绝地求生'" @click="toZone" class="fc">免费玩此游戏</el-button>
 					</div>
@@ -170,8 +170,8 @@ export default {
 			},
 			isSpread: false,
 			tagsInfo: [],
-			zuMayId: 1,
-			leaseNum: 1,
+			leaseWayId: 1,
+			leaseTime: 1,
 			leaseMinNum: 1,
 			leaseMaxNum: 1000,
 
@@ -194,11 +194,11 @@ export default {
 				this.isSpread = true;
 			});
 		this.$api.post('GoodInfo', {
-			code: this.$route.query.leaseId,
-			res: this.$route.query.resId
+			code: this.$route.query.leaseCode,
+			res: this.$route.query.resCode
 		}).then(res => {
 			this.goodsInfo = res.obj;
-			this.leaseNum = this.goodsInfo.price.minCount;
+			this.leaseTime = this.goodsInfo.price.minCount;
 			this.leaseMinNum = this.goodsInfo.price.minCount;
 			if (this.goodsInfo.price.maxCount > 0) this.leaseMaxNum = this.goodsInfo.price.maxCount;
 			this.isShowLtc = (this.goodsInfo.goodType.path).split('_')[2];
@@ -222,45 +222,35 @@ export default {
 		})
 	},
 	methods: {
-		zuMayFn (e) {
-			this.zuMayId = e;
+		leaseWaySel (e) {
+			this.leaseWayId = e;
 		},
 		countChange (e) {
-			this.leaseNum = e;
+			this.leaseTime = e;
 		},
 		toLeaseOrder () {
+			// 租赁模式
+			let leaseWay = {
+				way: (this.leaseWayId == 2)? '天':'小时',
+				time: this.leaseTime
+			}
 			// 默认小时
-			let createOrder = {
-				goodCode: this.goodsInfo.code,
+			let createQuery = {
 				userID: this.goodsInfo.user.id,
+				goodCode: this.goodsInfo.code,
 				res: this.goodsInfo.res,
-				count: this.leaseNum,
+				count: this.leaseTime,
 				baotianFlag: false
 			}
 			// 包天
-			if (this.zuMayId == 2) {
-				createOrder.count = 0;
-				createOrder.baotianFlag = true;
+			if (this.leaseWayId == 2) {
+				createQuery.count = 0;
+				createQuery.baotianFlag = true;
 			}
-			this.$api.post('CreateOrder', JSON.stringify(createOrder))
-				.then(res => {
-					let _data = res.obj;
-					sessionStorage.setItem('leaseOrder', JSON.stringify({
-						goodPath: _data.goodPath,
-						createTime: _data.createTime,
-						price: _data.price,
-						leaseWay: (this.zuMayId == 2)? '天':'小时',
-						goodLoginStr: _data.goodLoginStr,
-						leaseTime: this.leaseNum,
-						startTime: _data.startTime,
-						endTime: _data.endTime,
-						orderPrice:  (_data.price * this.leaseNum),
-						deposit: _data.deposit,
-						payPrice: _data.payPrice,
-						orderCode: _data.orderCode
-					}));
-					this.$router.push('/lease-order');
-				});
+			this.$router.push({path: '/lease-order', query: {
+				leaseWay: JSON.stringify(leaseWay),
+				createQuery: JSON.stringify(createQuery)
+			}});
 		},
 		toZone () {
 			this.$router.push('/zone');
@@ -337,16 +327,31 @@ export default {
 			border-top: 1px dashed #d9d9d9;
 			border-bottom: 1px dashed #d9d9d9;
 			li {
+				position: relative;
 				width: 160px;
 				margin-right: 10px;
 				box-sizing: border-box;
 				cursor: pointer;
-				// &:hover p{
-				// 	border-color: #ff5f5f;
-				// }
-				&.active p{
+				&.active p {
 					border-color: #ff5f5f;
 					color: #ff5f5f;
+				}
+				&.active::before {
+					position: absolute;
+					right: 0;
+					bottom: 0;
+					width: 0;
+					height: 0;
+					content: " ";
+					border-left: 20px solid transparent;
+					border-bottom: 20px solid #ff5f5f;
+				}
+				&.active::after {
+					position: absolute;
+					right: 0;
+					bottom: 0;
+					content: "√";
+					color: #fff;
 				}
 			}
 			span {

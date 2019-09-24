@@ -46,14 +46,6 @@ export default new Router({
 					component: () => import('./views/lease-order')
 				},
 				{
-					path: '/lease-pay',
-					name: 'lease-pay',
-					meta: {
-						isShowLogo: 1
-					},
-					component: () => import('./views/lease-pay')
-				},
-				{
 					path: '/payment',
 					name: 'payment',
 					meta: {
