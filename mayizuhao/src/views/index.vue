@@ -234,7 +234,7 @@ export default {
 			activityList: [],
 			FAQFid: 0,
 
-			isShowHotGame: false,
+			// isShowHotGame: false,
 			isShowClsGame: false,
 			tabsActive: '1',
 			isShowZone: false,

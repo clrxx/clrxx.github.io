@@ -42,7 +42,7 @@
 							<el-button size="medium" slot="reference" :title="gameEName">{{ gameEName }}</el-button>
 						</el-popover>
 					</li>
-					<li><el-button @click="gameSearch" type="danger" size="medium">搜索</el-button></li>
+					<li><el-button @click="gameSearch" type="danger" size="medium" class="search">搜索</el-button></li>
 				</ul>
 			</div>
 		</div>
@@ -61,9 +61,9 @@ export default {
 			gameSGoods: [],
 			gameSName: '选择游戏',
 			gameYGoods: [],
-			gameYName: '请选择游戏区',
+			gameYName: '选择游戏区',
 			gameEGoods: [],
-			gameEName: '请选择游戏服',
+			gameEName: '选择游戏服',
 			gameFullPath: '',
 		}
 	},
@@ -124,9 +124,9 @@ export default {
 		recode () {
 			this.popGs = false;
 			this.gameYGoods = [];
-			this.gameYName = '请选择游戏区';
+			this.gameYName = '选择游戏区';
 			this.gameEGoods = [];
-			this.gameEName = '请选择游戏服';
+			this.gameEName = '选择游戏服';
 		}
 	},
 	watch: {
@@ -177,12 +177,16 @@ export default {
 		flex-wrap: wrap;
 		.el-button {
 			overflow: hidden;
-			max-width: 130px;
+			min-width: 100px;
+			max-width: 120px;
 			height: 36px;
 			text-overflow: ellipsis;
 			border: none;
 			border-right: 1px solid #DCDFE6;
 			border-radius: 0;
+		}
+		.search {
+			min-width: 70px;
 		}
 	}
 	.pop-game-cont {

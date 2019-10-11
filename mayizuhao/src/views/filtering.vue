@@ -8,38 +8,44 @@
 						<el-breadcrumb-item>租号中心</el-breadcrumb-item>
 						<el-breadcrumb-item>{{ gameSName }}</el-breadcrumb-item>
 					</el-breadcrumb>
-					<!-- <a @click="refresh" class="clear">清空筛选条件</a> -->
+					<!-- <a class="clear">清空筛选条件</a> -->
 				</div>
 				<div class="sel-cont">
-					<h4>热门端游</h4>
+					<h3>热门端游</h3>
 					<ul class="sel-list game">
 						<li v-for="item in pcGoodsLen" :key="item.name" @click="selGameSs(item)">
-							<el-tooltip class="item" effect="dark" :content="item.name" placement="top">
-								<el-image fit="cover" :src="item.imageUrl">
-									<div slot="placeholder" class="image-slot">
-										<i class="el-icon-picture-outline"></i>
-									</div>
-								</el-image>
-							</el-tooltip>
+							<div class="hot">
+								<el-tooltip effect="dark" :content="item.name" placement="top">
+									<el-image fit="cover" :src="item.imageUrl">
+										<div slot="placeholder" class="image-slot">
+											<i class="el-icon-picture-outline"></i>
+										</div>
+									</el-image>
+								</el-tooltip>
+								<h5>{{ item.name }}</h5>
+							</div>
 						</li>
 					</ul>
 				</div>
 				<div class="sel-cont">
-					<h4>热门手游</h4>
+					<h3>热门手游</h3>
 					<ul class="sel-list game">
 						<li v-for="item in moGoodsLen" :key="item.name" @click="selGameSs(item)">
-							<el-tooltip class="item" effect="dark" :content="item.name" placement="top">
-								<el-image fit="cover" :src="item.imageUrl">
-									<div slot="placeholder" class="image-slot">
-										<i class="el-icon-picture-outline"></i>
-									</div>
-								</el-image>
-							</el-tooltip>
+							<div class="hot">
+								<el-tooltip effect="dark" :content="item.name" placement="bottom">
+									<el-image fit="cover" :src="item.imageUrl">
+										<div slot="placeholder" class="image-slot">
+											<i class="el-icon-picture-outline"></i>
+										</div>
+									</el-image>
+								</el-tooltip>
+								<h5>{{ item.name }}</h5>
+							</div>
 						</li>
 					</ul>
 				</div>
 				<div class="sel-cont">
-					<h4 class="sl">游戏区服</h4>
+					<h3>游戏区服</h3>
 					<ul class="sel-list pop">
 						<li>
 							<el-popover width="800" placement="bottom-start" v-model="popGs">
@@ -79,34 +85,64 @@
 						</li>
 					</ul>
 				</div>
-				<div class="sel-cont">
-					<h4 class="sl">高级选项</h4>
-					<ul class="sel-list sort">
-						<li>
-							<el-popover placement="bottom">
-								<el-button @click="descFn(2)" size="mini" class="lt-btn">由低到高</el-button>
-								<el-button @click="descFn(1)" size="mini" class="lt-btn">由高到低</el-button>
-								<el-button @click="showFixedTagsShow('价格排序')" slot="reference">价格排序</el-button>
-							</el-popover>
-						</li>
-						<li v-for="item in advancedOptions" :key="item.name">
-							<el-popover placement="bottom">
-								<div v-if="item.decide == 1" class="input-number">
-									<el-input-number v-model="minNum" :min="0" size="mini"></el-input-number> ~ <el-input-number v-model="maxNum" :min="0" size="mini"></el-input-number>
-									<el-button @click="addScopeTags(item)" size="mini" class="lt-btn">确定</el-button>
+				<div v-if="advancedTags.length > 0" class="sel-cont">
+					<h3>高级选项</h3>
+					<div class="tabs">
+						<el-tabs v-model="tabsActive" @tab-click="tabsClick">
+							<el-tab-pane v-for="(item, index) in advancedTags" :key="index" :label="item.name" :name="`${item.name}&${item.decide}`">
+								<div v-if="item.decide == 1" class="decide">
+									<div v-if="item.name == '价格范围'" class="ifcl">
+										<el-button @click="addScopeTagsCus({name: '价格范围', s: 0, e: 1})" size="mini">一元租号</el-button>
+										<el-button @click="addScopeTagsCus({name: '价格范围', s: 0, e: 2})" size="mini">二元租号</el-button>
+										<el-button @click="addScopeTagsCus({name: '价格范围', s: 0, e: 3})" size="mini">0-3元</el-button>
+										<el-button @click="addScopeTagsCus({name: '价格范围', s: 3, e: 5})" size="mini">3-5元</el-button>
+										<el-button @click="addScopeTagsCus({name: '价格范围', s: 5, e: 999999999})" size="mini">5元以上</el-button>
+									</div>
+									<div v-if="item.name == '英雄数量'" class="ifcl">
+										<el-button @click="addScopeTagsCus({name: '英雄数量', s: 0, e: 29})" size="mini">0-29</el-button>
+										<el-button @click="addScopeTagsCus({name: '英雄数量', s: 30, e: 59})" size="mini">30-59</el-button>
+										<el-button @click="addScopeTagsCus({name: '英雄数量', s: 60, e: 99})" size="mini">60-99</el-button>
+										<el-button @click="addScopeTagsCus({name: '英雄数量', s: 100, e: 129})" size="mini">100-129</el-button>
+										<el-button @click="addScopeTagsCus({name: '英雄数量', s: 130, e: 999999999})" size="mini">130及以上</el-button>
+									</div>
+									<div v-if="item.name == '皮肤数量'" class="ifcl">
+										<el-button @click="addScopeTagsCus({name: '皮肤数量', s: 0, e: 29})" size="mini">0-29</el-button>
+										<el-button @click="addScopeTagsCus({name: '皮肤数量', s: 30, e: 100})" size="mini">30-100</el-button>
+										<el-button @click="addScopeTagsCus({name: '皮肤数量', s: 101, e: 199})" size="mini">101-199</el-button>
+										<el-button @click="addScopeTagsCus({name: '皮肤数量', s: 200, e: 299})" size="mini">200-299</el-button>
+										<el-button @click="addScopeTagsCus({name: '皮肤数量', s: 300, e: 399})" size="mini">300-399</el-button>
+										<el-button @click="addScopeTagsCus({name: '皮肤数量', s: 400, e: 499})" size="mini">400-499</el-button>
+										<el-button @click="addScopeTagsCus({name: '皮肤数量', s: 500, e: 999999999})" size="mini">500及以上</el-button>
+									</div>
+									<div v-if="item.name == '英雄武器数量'" class="ifcl">
+										<el-button @click="addScopeTagsCus({name: '英雄武器数量', s: 1, e: 10})" size="mini">1-10v</el-button>
+										<el-button @click="addScopeTagsCus({name: '英雄武器数量', s: 11, e: 20})" size="mini">11-20v</el-button>
+										<el-button @click="addScopeTagsCus({name: '英雄武器数量', s: 21, e: 30})" size="mini">21-30v</el-button>
+										<el-button @click="addScopeTagsCus({name: '英雄武器数量', s: 31, e: 40})" size="mini">31-40v</el-button>
+										<el-button @click="addScopeTagsCus({name: '英雄武器数量', s: 41, e: 50})" size="mini">41-50v</el-button>
+										<el-button @click="addScopeTagsCus({name: '英雄武器数量', s: 51, e: 70})" size="mini">51-70v</el-button>
+										<el-button @click="addScopeTagsCus({name: '英雄武器数量', s: 70, e: 999999999})" size="mini">70v及以上</el-button>
+									</div>
+									<el-input-number v-model="minNum" :min="0" size="mini"></el-input-number><span class="til">~</span><el-input-number v-model="maxNum" :min="0" size="mini"></el-input-number>
+									<el-button @click="addScopeTags(item)" size="mini" class="lt-btn-10">确定</el-button>
 								</div>
-								<div v-if="item.decide == 2">
-									<el-button v-for="ime in fixedTagsBtnSel" :key="ime" @click="addFixedTags(item.name, ime)" size="mini" class="lt-btn">{{ ime }}</el-button>
+								<div v-if="item.decide == 2" class="decide">
+									<el-button v-for="ime in fixedTagsSel" :key="ime" @click="addFixedTags(item.name, ime)" size="mini" class="bt-btn-10">{{ ime }}</el-button>
 								</div>
-								<el-button @click="showFixedTagsShow(item)" slot="reference">{{ item.name }}</el-button>
-							</el-popover>
-						</li>
-					</ul>
+							</el-tab-pane>
+						</el-tabs>
+					</div>
 				</div>
 			</div>
-			<div class="filtering-list white-radius">
+			<div class="filtering-cont white-radius">
+				<div class="filtering-ranking">
+					<a class="oto">综合排序</a>
+					<a @click="isDescFn" :class="{active: isDesc == true}" class="ote">价格<i class="el-icon-caret-top"></i>
+						<i class="el-icon-caret-bottom"></i>
+					</a>
+				</div>
 				<null-data v-if="goods.length == 0" />
-				<ul>
+				<ul class="filtering-list">
 					<li v-for="item in goods" :key="item.code">
 						<div class="ac">
 							<div class="ae">
@@ -156,14 +192,15 @@ export default {
 			gameSGoods: [],
 			gameSName: '选择游戏',
 			gameYGoods: [],
-			gameYName: '请选择游戏区',
+			gameYName: '选择游戏区',
 			gameEGoods: [],
-			gameEName: '请选择游戏服',
+			gameEName: '选择游戏服',
 			gameFullPath: '',
 
-			advancedOptions: [],
+			tabsActive: '',
+			advancedTags: [],
 			fixedTagsObj: {},
-			fixedTagsBtnSel: [],
+			fixedTagsSel: [],
 			fixedTags: [],
 			scopeTags: [],
 			isDesc: false,
@@ -179,30 +216,30 @@ export default {
 	created () {
 		// 处理页面传值过来对应各选项 start
 		let _query = this.$route.query.goodsId;
-		let _list = [];
+		let _nlist = [];
 		let _num = _query.indexOf('_');
 		let _vlist = _query.split('_');
 		while (_num > -1) {
-			_list.push(_num);
+			_nlist.push(_num);
 			_num = _query.indexOf('_', _num + 1);
 		}
-		let _listLen = _list.length;
-		if (_listLen >= 2) {
+		let _listLen = _nlist.length;
+		if (_listLen == 2) {
 			this.selGameSs({
 				name: _vlist[2],
-				path: _query.slice(0, _list[2]),
+				path: _query.slice(0, _nlist[2]),
 			});
 		}
-		if (_listLen >= 3) {
+		if (_listLen == 3) {
 			this.selGameYs({
 				name: _vlist[3],
-				path: _query.slice(0, _list[3])
+				path: _query.slice(0, _nlist[3])
 			});
 		}
-		if (_listLen >= 4) {
+		if (_listLen == 4) {
 			this.selGameEs({
 				name: _vlist[4],
-				path: _query.slice(0, _list[4])
+				path: _query.slice(0, _nlist[4])
 			});
 		}
 		// end
@@ -215,8 +252,6 @@ export default {
 				this.moGoods = res.obj;
 			})
 		this.selGameCls('游戏_端游');
-		this.getSupportScopeTags();
-		this.getSupportFixedTags();
 		this.goodsPage();
 	},
 	computed: {
@@ -268,18 +303,18 @@ export default {
 		gameSearch () {
 			this.$router.replace({path: this.$route.path, query: {goodsId: this.gameFullPath}});
 			this.pageCurrent = 1;
-			this.advancedOptions = [];
-			this.getSupportScopeTags();
-			this.getSupportFixedTags();
+			this.advancedTags = [];
+			this.supportScopeTags();
+			this.supportFixedTags();
 			this.goodsPage();
 		},
 		// 获取游戏对应scopeTags列表
-		getSupportScopeTags () {
-			this.$api.post('GetSupportScopeTags', this.$route.query.goodsId)
+		supportScopeTags () {
+			this.$api.post('GetSupportScopeTags', JSON.stringify(this.$route.query.goodsId))
 				.then(res => {
 					let _list = res.obj;
 					for (let i=0; i<_list.length; i++) {
-						this.advancedOptions.push({
+						this.advancedTags.push({
 							name: _list[i],
 							decide: 1
 						});
@@ -287,42 +322,34 @@ export default {
 				})
 		},
 		// 获取游戏对应fixedTags列表
-		getSupportFixedTags () {
-			this.$api.post('GetSupportFixedTags', this.$route.query.goodsId)
+		supportFixedTags () {
+			this.$api.post('GetSupportFixedTags', JSON.stringify(this.$route.query.goodsId))
 				.then(res => {
 					this.fixedTagsObj = res.obj;
 					for (let key in this.fixedTagsObj) {
-						this.advancedOptions.push({
+						this.advancedTags.push({
 							name: key,
 							decide: 2
 						});
 					}
 				})
 		},
-		// 高级选择按钮功能
-		showFixedTagsShow (item) {
+		// 高级选项切换
+		tabsClick(tab) {
+			this.tabsActive = tab.name;
+			let _name = this.tabsActive.slice(0, this.tabsActive.indexOf('&'));
+			let _decide = this.tabsActive.slice(this.tabsActive.indexOf('&')+1);
 			this.minNum = 0;
 			this.maxNum = 0;
-			this.fixedTagsBtnSel = [];
-			if (item.decide == 2) {
+			this.fixedTagsSel = [];
+			if (_decide == 2) {
 				let _obj = this.fixedTagsObj;
-				if (_obj.hasOwnProperty(item.name)) {
-					for (let key in _obj) {
-						for (let j=0; j<_obj[key].length; j++ ) {
-							this.fixedTagsBtnSel.push(_obj[key][j]);
-						}
+				if (_obj.hasOwnProperty(_name)) {
+					for (let i=0; i<_obj[_name].length; i++) {
+						this.fixedTagsSel.push(_obj[_name][i])
 					}
 				}
 			}
-		},
-		// 价格排序
-		descFn (ids) {
-			if (ids == 1) {
-				this.isDesc = true;
-			} else if (ids == 2) {
-				this.isDesc = false;
-			}
-			this.goodsPage();
 		},
 		// 添加商品查询参数scopeTags
 		addScopeTags (item) {
@@ -338,30 +365,53 @@ export default {
 				});
 			} else {
 				let _len = this.scopeTags.length;
-				this.scopeTags.push({
-					name: item.name,
-					startValue: this.minNum,
-					endValue: this.maxNum
-				});
 				for (let i=0; i<_len; i++) {
 					if (item.name == this.scopeTags[i].name) {
 						this.scopeTags.splice(i, 1);
 						break;
 					}
 				}
+				this.scopeTags.push({
+					name: item.name,
+					startValue: this.minNum,
+					endValue: this.maxNum
+				});
 				this.goodsPage();
 			}
+		},
+		// 自定义的scopeTags
+		addScopeTagsCus (item) {
+			this.minNum = 0;
+			this.maxNum = 0;
+			let _len = this.scopeTags.length;
+			for (let i=0; i<_len; i++) {
+				if (item.name == this.scopeTags[i].name) {
+					this.scopeTags.splice(i, 1);
+					break;
+				}
+			}
+			this.scopeTags.push({
+				name: item.name,
+				startValue: item.s,
+				endValue: item.e
+			});
+			this.goodsPage();
 		},
 		// 添加商品查询参数fixedTages
 		addFixedTags (name, value) {
 			let _len = this.fixedTags.length;
-			this.fixedTags.push({ name, value });
 			for (let i=0; i<_len; i++) {
 				if (name == this.fixedTags[i].name) {
 					this.fixedTags.splice(i, 1);
 					break;
 				}
 			}
+			this.fixedTags.push({ name, value });
+			this.goodsPage();
+		},
+		// 价格排序
+		isDescFn () {
+			this.isDesc = !this.isDesc;
 			this.goodsPage();
 		},
 		// 查询商品
@@ -401,9 +451,9 @@ export default {
 		recode () {
 			this.popGs = false;
 			this.gameYGoods = [];
-			this.gameYName = '请选择游戏区';
+			this.gameYName = '选择游戏区';
 			this.gameEGoods = [];
-			this.gameEName = '请选择游戏服';
+			this.gameEName = '选择游戏服';
 			this.fixedTags = [];
 			this.scopeTags = [];
 			this.minNum = 0;
@@ -431,12 +481,12 @@ export default {
 			.el-breadcrumb {
 				margin-right: 100px;
 			}
-			.clear {
-				cursor: pointer;
-				&:hover {
-					color: #409eff;
-				}
-			}
+			// .clear {
+			// 	cursor: pointer;
+			// 	&:hover {
+			// 		color: #409eff;
+			// 	}
+			// }
 		}
 		.sel-cont {
 			display: flex;
@@ -444,27 +494,39 @@ export default {
 			padding: 0 10px;
 			border-top: 1px solid #eee;
 			box-sizing: border-box;
-			h4 {
+			h3 {
 				flex-shrink: 0;
 				width: 100px;
-				line-height: 80px;
-				border-right: 1px solid #eee;
-			}
-			.sl {
-				line-height: 60px;
+				text-align: center;
 			}
 		}
 		.sel-list {
 			display: flex;
 			flex-wrap: wrap;
+			padding: 15px 0;
+			border-left: 1px solid #eee;
 			li {
 				position: relative;
 				padding: 0 15px;
 			}
 			&.game {
-				li {
+				.hot {
 					width: 130px;
 					height: 60px;
+					position: relative;
+				}
+				h5 {
+					overflow: hidden;
+					position: absolute;
+					bottom: 0;
+					left: 0;
+					width: 100%;
+					padding: 2px 0;
+					background: rgba(0, 0, 0, .5);
+					color: #fff;
+					text-align: center;
+					white-space: nowrap;
+					text-overflow: ellipsis;
 				}
 			}
 			&.pop {
@@ -477,33 +539,27 @@ export default {
 				}
 			}
 		}
-		.sort {
-			button {
-				padding: 7px 12px;
-				background: #fff;
-				border: 1px solid #dcdada;
-				cursor: pointer;
-				border-radius: 4px;
-				transition: all .3s;
-				&:hover {
-					color: #409eff;
-					border-color: #c6e2ff;
-					background-color: #ecf5ff;
+		.tabs {
+			width: 100%;
+			padding-left: 15px;
+			border-left: 1px solid #eee;
+			.decide {
+				display: flex;
+				align-items: center;
+				margin: 15px 0 5px;
+				.til {
+					padding: 0 3px;
 				}
-				&.active {
-					color: #409eff;
-					border-color: #c6e2ff;
-					background-color: #ecf5ff;
+				.ifcl {
+					margin-right: 10px;
+				}
+				.lt-btn-10 {
+					margin-left: 10px;
+				}
+				.bt-btn-10 {
+					margin-bottom: 10px;
 				}
 			}
-			.el-popover {
-				min-width: 50px;
-			}
-		}
-	}
-	.input-number {
-		.lt-btn {
-			margin-left: 10px;
 		}
 	}
 	.pop-game-cont {
@@ -534,10 +590,45 @@ export default {
 			}
 		}
 	}
-	.filtering-list {
+	.filtering-cont {
 		padding: 10px 10px 0;
 		margin-top: 30px;
 		box-sizing: border-box;
+	}
+	.filtering-ranking {
+		display: flex;
+		align-items: center;
+		padding: 10px 0 20px;
+		border-bottom: 1px solid #eee;
+		.oto {
+			padding: 0 20px;
+		}
+		.ote {
+			position: relative;
+			padding: 0 20px;
+			cursor: pointer;
+			&.active {
+				.el-icon-caret-top {
+					color: #515a6e;
+				}
+				.el-icon-caret-bottom {
+					color: #409eff;
+				}
+			}
+			i {
+				position: absolute;
+				right: 0;
+			}
+			.el-icon-caret-top {
+				top: -3px;
+				color: #409eff;
+			}
+			.el-icon-caret-bottom {
+				bottom: -3px;
+			}
+		}
+	}
+	.filtering-list {
 		li {
 			display: flex;
 			justify-content: space-between;

@@ -111,6 +111,21 @@ export default {
 			text-align: center;
 		}
 	}
+	.filtering {
+		.el-tabs__nav-wrap::after {
+			background: transparent;
+		}
+		.el-tabs__header {
+			margin: 0;
+		}
+		.el-tabs__active-bar {
+			bottom: 3px;
+		}
+		.el-input-number__decrease, 
+		.el-input-number__increase {
+			top: 2px;
+		}
+	}
 	.lease-info {
 		.el-tabs__item {
 			font-size: 16px;

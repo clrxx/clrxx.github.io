@@ -179,8 +179,8 @@ export default {
 			isShowLtc: '',
 
 			configs: {
-				width: 650,
-				height: 350,
+				width: 460,
+				height: 460,
 				maskWidth: 100,
 				maskHeight: 100,
 				maskColor: 'red',

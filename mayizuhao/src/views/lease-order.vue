@@ -17,13 +17,15 @@
 						</div>
 					</template>
 				</el-table-column>
-				<el-table-column prop="price" label="单价（元/时）" />
+				<el-table-column v-if="leaseWay.time == 0" prop="price" label="单价（元/天）" />
+				<el-table-column v-else prop="price" label="单价（元/时）" />
 				<el-table-column prop="leaseWay" label="收费方式" />
 			</el-table>
 			<div class="cont">
 				<ul class="clse">
 					<li><span>租号方式：</span>{{ goodLoginStr }}</li>
-					<li><span>租赁时间：</span>{{ leaseWay.time }}小时</li>
+					<li v-if="leaseWay.time == 0"><span>租赁时间：</span>包天</li>
+					<li v-else><span>租赁时间：</span>{{ leaseWay.time }}小时</li>
 					<li><span>可租时间段：</span>00:00 ~ 23:00</li>
 				</ul>
 				<ul class="price">
@@ -128,13 +130,16 @@ export default {
 				firstImage: _data.imageUrl[0],
 				goodTitle: _data.name,
 				goodPath: _data.goodType.path,
-				price: _data.price.price,
+				price:  _data.price.price,
 				leaseWay: this.leaseWay.way
 			});
+			if (this.leaseWay.time == 0) {
+				this.tableData[0].price = _data.price.baoTianPrice;
+			}
 			this.goodLoginStr = _data.goodLoginStr;
 			this.depositPrice = _data.depositPrice;
-			if (this.leaseWay.way == '天') {
-				this.orderPrice = _data.price.price;
+			if (this.leaseWay.time == 0) {
+				this.orderPrice = _data.price.baoTianPrice;
 			} else {
 				this.orderPrice = this.leaseWay.time * _data.price.price;
 			}
